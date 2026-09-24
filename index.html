@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CallerCRM — The calling CRM for tele-sales teams</title>
+  <meta name="description" content="CallerCRM helps tele-sales teams dial leads in one tap, log every outcome, follow up on WhatsApp and track agent performance in real time. Made in India by CodeByAkshay.">
+  <link rel="canonical" href="https://callercrm.codebyakshay.com/">
+  <meta name="theme-color" content="#8c56d4">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="CallerCRM">
+  <meta property="og:title" content="CallerCRM — The calling CRM for tele-sales teams">
+  <meta property="og:description" content="Dial leads in one tap, log every outcome, follow up on WhatsApp and see your whole team's performance live.">
+  <meta property="og:url" content="https://callercrm.codebyakshay.com/">
+  <meta property="og:image" content="https://callercrm.codebyakshay.com/assets/img/logo-512.png">
+  <meta name="twitter:card" content="summary">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/mockups.css">
+  <link rel="stylesheet" href="/assets/css/home.css">
+
+  <script>document.documentElement.classList.add("js");</script>
+  <script src="/assets/js/main.js" defer></script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "CallerCRM",
+    "operatingSystem": "Android",
+    "applicationCategory": "BusinessApplication",
+    "description": "Calling CRM for tele-sales teams: one-tap dialing, outcome tracking, WhatsApp follow-ups and agent performance reports.",
+    "publisher": { "@type": "Organization", "name": "CodeByAkshay", "email": "privacy@codebyakshay.com" }
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Header (same markup on every page — see README) -->
+  <header class="site-header">
+    <nav class="container nav" aria-label="Main">
+      <a class="brand" href="/">
+        <img src="/assets/img/icon-192.png" alt="" width="36" height="36">
+        CallerCRM
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu" aria-label="Open menu"><span></span></button>
+      <div class="nav-menu" id="nav-menu">
+        <ul class="nav-links">
+          <li><a href="/#how">How it works</a></li>
+          <li><a href="/#tour">Product tour</a></li>
+          <li><a href="/#features">Features</a></li>
+          <li><a href="/#security">Security</a></li>
+          <li><a href="/#faq">FAQ</a></li>
+        </ul>
+        <a class="btn btn-primary btn-sm" href="mailto:privacy@codebyakshay.com?subject=CallerCRM%20early%20access">Get early access</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="pill" data-rise><span class="dot"></span>Now in closed testing on Google Play</span>
+          <h1 data-rise style="--delay:.08s">Every lead called.<br><span class="gradient-text">Every outcome logged.</span></h1>
+          <p class="hero-lede" data-rise style="--delay:.16s">CallerCRM is the calling app for tele-sales teams. Agents dial leads in one tap and log what happened in two. Managers see every call, every agent and every interested lead as it happens.</p>
+          <div class="hero-actions" data-rise style="--delay:.24s">
+            <a class="btn btn-primary" href="mailto:privacy@codebyakshay.com?subject=CallerCRM%20early%20access">
+              Get early access
+              <svg aria-hidden="true"><use href="/assets/img/icons.svg#arrow-right"/></svg>
+            </a>
+            <a class="btn btn-ghost" href="#how">See how it works</a>
+          </div>
+          <ul class="hero-trust" data-rise style="--delay:.32s">
+            <li><svg aria-hidden="true"><use href="/assets/img/icons.svg#pin"/></svg>Data hosted in India</li>
+            <li><svg aria-hidden="true"><use href="/assets/img/icons.svg#eye-off"/></svg>No call recording</li>
+            <li><svg aria-hidden="true"><use href="/assets/img/icons.svg#award"/></svg>Udyam-registered</li>
+          </ul>
+        </div>
+
+        <!-- Illustrative app mockup (names and numbers are made up) -->
+        <div class="hero-visual" aria-hidden="true">
+          <div class="orbit"></div>
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="app-bar">
+                <div><small>Good morning, Priya</small><strong>Today's leads</strong></div>
+                <div class="avatar">PS</div>
+              </div>
+              <div class="mini-stats">
+                <div><b>24</b><span>Assigned</span></div>
+                <div><b>17</b><span>Called</span></div>
+                <div><b>6</b><span>Interested</span></div>
+              </div>
+              <ul class="lead-list">
+                <li class="lead is-active"><div class="avatar">RV</div><div class="lead-info"><b>Rahul Verma</b><span>+91 98••• ••210</span></div><span class="chip chip-int">Interested</span><span class="call-btn"><svg><use href="/assets/img/icons.svg#phone-fill"/></svg></span></li>
+                <li class="lead"><div class="avatar">AK</div><div class="lead-info"><b>Anjali Kapoor</b><span>+91 97••• ••845</span></div><span class="chip chip-cb">Callback</span><span class="call-btn"><svg><use href="/assets/img/icons.svg#phone-fill"/></svg></span></li>
+                <li class="lead"><div class="avatar">MS</div><div class="lead-info"><b>Mohit Singh</b><span>+91 88••• ••031</span></div><span class="chip chip-new">New</span><span class="call-btn"><svg><use href="/assets/img/icons.svg#phone-fill"/></svg></span></li>
+                <li class="lead"><div class="avatar">NJ</div><div class="lead-info"><b>Neha Joshi</b><span>+91 70••• ••597</span></div><span class="chip chip-new">New</span><span class="call-btn"><svg><use href="/assets/img/icons.svg#phone-fill"/></svg></span></li>
+              </ul>
+              <div class="tab-bar">
+                <span class="on"><svg><use href="/assets/img/icons.svg#users"/></svg>Leads</span>
+                <span><svg><use href="/assets/img/icons.svg#clock"/></svg>Logs</span>
+                <span><svg><use href="/assets/img/icons.svg#chat"/></svg>WhatsApp</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="float-card card-notif">
+            <span class="float-icon"><svg><use href="/assets/img/icons.svg#bell"/></svg></span>
+            <div><b>5 new leads assigned</b><small>just now</small></div>
+          </div>
+          <div class="float-card card-call">
+            <span class="float-icon"><svg><use href="/assets/img/icons.svg#phone"/></svg></span>
+            <div><small>On call · Rahul Verma</small><b class="timer" data-timer>00:42</b><span class="wave"><i></i><i></i><i></i><i></i></span></div>
+          </div>
+          <div class="float-card card-outcome">
+            <span class="float-icon"><svg><use href="/assets/img/icons.svg#check-circle"/></svg></span>
+            <div><small>Outcome saved</small><b class="outcome-text" data-outcome>Interested</b></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Value strip -->
+    <section class="strip" aria-label="Highlights">
+      <div class="container strip-grid">
+        <div class="strip-item" data-reveal><b class="gradient-text">1 tap</b><span>to dial from your own SIM</span></div>
+        <div class="strip-item" data-reveal style="--delay:.08s"><b class="gradient-text">2 taps</b><span>to log the outcome</span></div>
+        <div class="strip-item" data-reveal style="--delay:.16s"><b class="gradient-text">Instant</b><span>alerts when leads land</span></div>
+        <div class="strip-item" data-reveal style="--delay:.24s"><b class="gradient-text">0</b><span>spreadsheets to chase</span></div>
+      </div>
+    </section>
+
+    <!-- How it works: flow diagram -->
+    <section class="section how" id="how">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">How it works</span>
+          <h2>From spreadsheet to sale, <span class="gradient-text">on autopilot</span></h2>
+          <p>One loop runs your whole calling floor. The admin brings the leads in, and CallerCRM takes them to the right phone and brings the results back.</p>
+        </div>
+        <div class="flow" role="list" data-reveal>
+          <span class="flow-dot" aria-hidden="true"></span><span class="flow-dot" aria-hidden="true"></span><span class="flow-dot" aria-hidden="true"></span>
+          <div class="flow-node" role="listitem">
+            <div class="flow-vis" aria-hidden="true"><span class="tag">01</span><div class="fv-sheet"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+            <div><h3>Import</h3><p>Paste a Google Sheet link. CallerCRM reads the names and numbers.</p></div>
+          </div>
+          <div class="flow-node" role="listitem">
+            <div class="flow-vis" aria-hidden="true"><span class="tag">02</span><div class="fv-avatars"><span>A</span><span>D</span><span>K</span></div><span class="fv-split">40 · 40 · 40</span></div>
+            <div><h3>Assign</h3><p>Tick your agents, and the leads are split between them evenly.</p></div>
+          </div>
+          <div class="flow-node" role="listitem">
+            <div class="flow-vis" aria-hidden="true"><span class="tag">03</span><div class="fv-bell"><svg><use href="/assets/img/icons.svg#bell"/></svg><b>5</b></div></div>
+            <div><h3>Alert</h3><p>Every agent gets a push notification the moment their leads land.</p></div>
+          </div>
+          <div class="flow-node" role="listitem">
+            <div class="flow-vis" aria-hidden="true"><span class="tag">04</span><div class="fv-call"><svg><use href="/assets/img/icons.svg#phone-fill"/></svg></div></div>
+            <div><h3>Call &amp; log</h3><p>One tap to dial and two to log the outcome. Call length is saved automatically.</p></div>
+          </div>
+          <div class="flow-node" role="listitem">
+            <div class="flow-vis" aria-hidden="true"><span class="tag">05</span><div class="fv-bars"><i style="--h:40%"></i><i style="--h:70%"></i><i style="--h:55%"></i><i style="--h:95%"></i></div></div>
+            <div><h3>Track</h3><p>Calls, talk time, outcomes and attendance show up for the admin live.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product tour: annotated mockups of the real screens (made-up data) -->
+    <section class="section" id="tour">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">Product tour</span>
+          <h2>A closer look at <span class="gradient-text">every screen</span></h2>
+          <p>These are the actual CallerCRM screens with sample data. Hover over a numbered point to see it on the phone.</p>
+        </div>
+
+        <div class="tour-list">
+          <!-- 1. Import from Google Sheets (Record Transfer) -->
+          <article class="spot" data-spot>
+            <div class="spot-visual" data-reveal aria-hidden="true">
+              <div class="spot-float sheet-card hide-sm">
+                <header><svg><use href="/assets/img/icons.svg#sheet"/></svg>Leads — September</header>
+                <table>
+                  <tr><th>A · Name</th><th>B · Phone</th></tr>
+                  <tr><td>Ishita Rao</td><td>98••• ••412</td></tr>
+                  <tr><td>Rohan Gupta</td><td>97••• ••088</td></tr>
+                  <tr><td>Sneha Iyer</td><td>88••• ••356</td></tr>
+                  <tr><td>Vivaan Shah</td><td>70••• ••921</td></tr>
+                </table>
+                <div class="progress"><i></i></div>
+              </div>
+              <div class="phone">
+                <div class="m">
+                  <div class="m-top"><span class="m-back"><svg><use href="/assets/img/icons.svg#arrow-left"/></svg></span><h4>Record Transfer</h4></div>
+                  <div class="m-body lilac">
+                    <div class="m-card">
+                      <div class="m-label"><svg><use href="/assets/img/icons.svg#sheet"/></svg>Google Sheet source</div>
+                      <div class="m-flabel" style="margin-top:0">Google Sheet URL</div>
+                      <div class="m-inline"><div class="m-field">docs.google.com/spreadsheets/d/1Xa…</div><span class="m-btn">Connect</span></div>
+                      <div class="m-flabel">Target Columns</div>
+                      <div class="m-field">A, B</div>
+                      <div class="m-grid2">
+                        <div><div class="m-flabel">Start Row</div><div class="m-field">2</div></div>
+                        <div><div class="m-flabel">End Row</div><div class="m-field">121</div></div>
+                      </div>
+                      <div class="m-info">ⓘ Total selected: 120 records</div>
+                      <span class="m-btn wide">Fetch Records</span>
+                    </div>
+                    <div class="m-card">
+                      <div class="m-label"><svg><use href="/assets/img/icons.svg#users"/></svg>Agent assignment<span class="m-chip date">24-Sep</span></div>
+                      <div class="m-info" style="margin-top:0">120 records → 3 agents · 40 each</div>
+                      <div class="m-agents">
+                        <div class="m-agent"><span class="m-check"><svg><use href="/assets/img/icons.svg#check"/></svg></span><span class="m-av">A</span>Aarav Mehta<span class="m-recs">40 records</span></div>
+                        <div class="m-agent"><span class="m-check"><svg><use href="/assets/img/icons.svg#check"/></svg></span><span class="m-av">D</span>Diya Nair<span class="m-recs">40 records</span></div>
+                        <div class="m-agent"><span class="m-check"><svg><use href="/assets/img/icons.svg#check"/></svg></span><span class="m-av">K</span>Kabir Khanna<span class="m-recs">40 records</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <span class="pin" data-pin="1" style="--x:88%;--y:22%">1</span>
+                <span class="pin" data-pin="2" style="--x:92%;--y:36%">2</span>
+                <span class="pin" data-pin="3" style="--x:92%;--y:77%">3</span>
+              </div>
+            </div>
+            <div class="spot-copy" data-reveal>
+              <span class="eyebrow">For admins · Record Transfer</span>
+              <h3>Load a day's leads in under a minute</h3>
+              <p>No CSV exports and no copy-paste. Keep your leads in the Google Sheet you already use, and CallerCRM shares them out to the team.</p>
+              <ol class="notes">
+                <li data-note="1"><span class="num">1</span><div><b>Paste the sheet link and connect</b><p>Any sheet that's shared by link. CallerCRM never asks for your Google account.</p></div></li>
+                <li data-note="2"><span class="num">2</span><div><b>Pick the columns and rows</b><p>Choose where the names and numbers are and how many rows to take.</p></div></li>
+                <li data-note="3"><span class="num">3</span><div><b>Tick agents to split the leads evenly</b><p>See the split before you confirm. Each agent is notified straight away.</p></div></li>
+              </ol>
+            </div>
+          </article>
+
+          <!-- 2. Agent lead list + outcome -->
+          <article class="spot" data-spot>
+            <div class="spot-visual" data-reveal aria-hidden="true">
+              <div class="spot-float push-card hide-sm">
+                <span class="float-icon"><svg><use href="/assets/img/icons.svg#bell"/></svg></span>
+                <div><b>40 new leads assigned</b><small>CallerCRM · just now</small></div>
+              </div>
+              <div class="phone">
+                <div class="m">
+                  <div class="m-top"><h4>Lead</h4><span class="date">Sep 24</span><span class="m-ico"><svg><use href="/assets/img/icons.svg#calendar"/></svg></span><span class="m-ico"><svg><use href="/assets/img/icons.svg#settings"/></svg></span></div>
+                  <div class="m-body">
+                    <div class="m-group g-new">NEW LEADS<span class="n">40</span></div>
+                    <div class="m-group g-int open">INTERESTED<span class="n">3</span></div>
+                    <div class="m-row"><span class="m-av">IR</span><div class="m-name"><b>Ishita Rao</b><span>98••• ••412</span></div><span class="m-chev"></span></div>
+                    <div class="m-row"><span class="m-av">TM</span><div class="m-name"><b>Tara Menon</b><span>99••• ••730</span></div><span class="m-chev"></span></div>
+                    <div class="m-group open">CALLED / PENDING<span class="n">12</span></div>
+                    <div class="m-row"><span class="m-av">RG</span><div class="m-name"><b>Rohan Gupta</b><span>97••• ••088</span></div><span class="m-chev"></span></div>
+                    <div class="m-row"><span class="m-av">AB</span><div class="m-name"><b>Arjun Bose</b><span>90••• ••615</span></div><span class="m-chev"></span></div>
+                    <div class="m-row"><span class="m-av">MP</span><div class="m-name"><b>Meera Pillai</b><span>81••• ••204</span></div><span class="m-chev"></span></div>
+                  </div>
+                  <div class="m-tabbar"><span class="on"><svg><use href="/assets/img/icons.svg#users"/></svg>Lead</span><span><svg><use href="/assets/img/icons.svg#file"/></svg>Call Log</span><span><svg><use href="/assets/img/icons.svg#chat"/></svg>WhatsApp</span></div>
+                </div>
+                <span class="pin" data-pin="1" style="--x:8%;--y:16.5%">1</span>
+                <span class="pin" data-pin="2" style="--x:58%;--y:10%">2</span>
+                <span class="pin" data-pin="3" style="--x:8%;--y:37%">3</span>
+              </div>
+              <div class="spot-float outcome-sheet">
+                <h5>How did the call go?</h5>
+                <div class="outcome-grid"><span>Callback</span><span>Called</span><span class="sel">Interested</span><span>Not Interested</span></div>
+                <div class="outcome-note">Wants a demo on Friday</div>
+              </div>
+            </div>
+            <div class="spot-copy" data-reveal>
+              <span class="eyebrow">For agents · Lead</span>
+              <h3>Today's leads, already sorted</h3>
+              <p>Agents open the app and know exactly who to call next. Every lead sits in a group by status, and hanging up brings the outcome screen straight up.</p>
+              <ol class="notes">
+                <li data-note="1"><span class="num">1</span><div><b>New, Interested, Called / Pending</b><p>Collapsible groups with live counts, so fresh leads never get buried.</p></div></li>
+                <li data-note="2"><span class="num">2</span><div><b>Any lead date</b><p>Jump back to an earlier batch with the calendar.</p></div></li>
+                <li data-note="3"><span class="num">3</span><div><b>Tap a lead to call</b><p>The call goes out on the agent's SIM. When it ends, one tap logs the outcome and an optional note.</p></div></li>
+              </ol>
+            </div>
+          </article>
+
+          <!-- 3. Call log -->
+          <article class="spot" data-spot>
+            <div class="spot-visual" data-reveal aria-hidden="true">
+              <div class="phone">
+                <div class="m">
+                  <div class="m-top"><h4>Call Log</h4><span class="m-ico red"><svg><use href="/assets/img/icons.svg#log-out"/></svg></span></div>
+                  <div class="m-body lilac">
+                    <div class="m-search"><svg><use href="/assets/img/icons.svg#search"/></svg>Search by name, number, or note…</div>
+                    <div class="m-seg"><span class="on">Initial Calls</span><span>Wakeup Calls</span></div>
+                    <div class="m-chips"><span class="m-chip date">Lead Date: Sep 24</span><span class="m-chip dark">All</span><span class="m-chip">Interested</span><span class="m-chip">Callback</span></div>
+                    <div class="m-meta">18 calls found · Total time: <b>42m 18s</b></div>
+                    <div class="m-group g-int">INTERESTED<span class="n">3</span></div>
+                    <div class="m-group">CALLED / PENDING<span class="n">4</span></div>
+                    <div class="m-group g-not open">NOT INTERESTED<span class="n">11</span></div>
+                    <div class="m-row"><div class="m-name"><b>Vivaan Shah</b><span>70••• ••921 · 10:16 AM</span></div><span class="m-dur">◷ 1m 12s</span><span class="m-edit"><svg><use href="/assets/img/icons.svg#pencil"/></svg></span></div>
+                    <div class="m-row"><div class="m-name"><b>Zoya Ali</b><span>93••• ••470 · 10:09 AM</span></div><span class="m-dur">◷ 35s</span><span class="m-edit"><svg><use href="/assets/img/icons.svg#pencil"/></svg></span></div>
+                  </div>
+                  <div class="m-tabbar"><span><svg><use href="/assets/img/icons.svg#users"/></svg>Lead</span><span class="on"><svg><use href="/assets/img/icons.svg#file"/></svg>Call Log</span><span><svg><use href="/assets/img/icons.svg#chat"/></svg>WhatsApp</span></div>
+                </div>
+                <span class="pin" data-pin="1" style="--x:92%;--y:17%">1</span>
+                <span class="pin" data-pin="2" style="--x:92%;--y:23.5%">2</span>
+                <span class="pin" data-pin="3" style="--x:66%;--y:66%">3</span>
+                <span class="pin" data-pin="4" style="--x:94%;--y:74%">4</span>
+              </div>
+              <div class="spot-float trend-card hide-sm">
+                <span class="float-icon"><svg><use href="/assets/img/icons.svg#clock"/></svg></span>
+                <div><b>Call length saved</b><small>read automatically after each call</small></div>
+              </div>
+            </div>
+            <div class="spot-copy" data-reveal>
+              <span class="eyebrow">For agents &amp; admins · Call Log</span>
+              <h3>Every call, grouped by what happened</h3>
+              <p>The log shows who was called, when, for how long and what they said, grouped by outcome so the next step is obvious.</p>
+              <ol class="notes">
+                <li data-note="1"><span class="num">1</span><div><b>Search anything</b><p>Find a call by name, number or even a word from the notes.</p></div></li>
+                <li data-note="2"><span class="num">2</span><div><b>First calls vs wake-up calls</b><p>Follow-up calls to interested leads are tracked separately from first attempts.</p></div></li>
+                <li data-note="3"><span class="num">3</span><div><b>Real talk time</b><p>Duration comes from the phone's own call record, not the agent's memory.</p></div></li>
+                <li data-note="4"><span class="num">4</span><div><b>Fix mistakes</b><p>Edit an outcome or note later if something changes.</p></div></li>
+              </ol>
+            </div>
+          </article>
+
+          <!-- 4. Admin dashboard -->
+          <article class="spot" data-spot>
+            <div class="spot-visual" data-reveal aria-hidden="true">
+              <div class="phone">
+                <div class="m">
+                  <div class="m-top"><h4>Admin</h4><span class="date">Sep 24</span><span class="m-ico"><svg><use href="/assets/img/icons.svg#calendar"/></svg></span><span class="m-ico"><svg><use href="/assets/img/icons.svg#settings"/></svg></span></div>
+                  <div class="m-body">
+                    <div class="m-h">Today's Campaign Performance</div>
+                    <div class="m-grid2">
+                      <div class="m-stat"><span class="ic"><svg><use href="/assets/img/icons.svg#phone-fill"/></svg></span><small>Total Calls</small><b>1,025</b></div>
+                      <div class="m-stat green"><span class="ic"><svg><use href="/assets/img/icons.svg#clock"/></svg></span><small>Avg Duration</small><b>48s</b></div>
+                    </div>
+                    <div class="m-card">
+                      <div class="m-label"><svg><use href="/assets/img/icons.svg#chart"/></svg>Call outcomes today</div>
+                      <div class="m-donut-wrap">
+                        <div class="m-donut"></div>
+                        <div class="m-legend">
+                          <span><i style="background:var(--green)"></i>Interested · 14%</span>
+                          <span><i style="background:var(--amber)"></i>Callback · 18%</span>
+                          <span><i style="background:var(--purple)"></i>Called · 38%</span>
+                          <span><i style="background:var(--red)"></i>Not interested · 30%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="m-card">
+                      <div class="m-label"><svg><use href="/assets/img/icons.svg#award"/></svg>Agent leaderboard</div>
+                      <div class="m-lb"><span class="medal">🥇</span><span class="nm">Diya Nair</span><span class="k"><b>142</b>calls</span><span class="k"><b>52s</b>avg</span><span class="k g"><b>9</b>leads</span></div>
+                      <div class="m-lb"><span class="medal">🥈</span><span class="nm">Aarav Mehta</span><span class="k"><b>128</b>calls</span><span class="k"><b>47s</b>avg</span><span class="k g"><b>7</b>leads</span></div>
+                      <div class="m-lb"><span class="medal">🥉</span><span class="nm">Kabir Khanna</span><span class="k"><b>117</b>calls</span><span class="k"><b>44s</b>avg</span><span class="k g"><b>6</b>leads</span></div>
+                    </div>
+                  </div>
+                  <div class="m-tabbar"><span><svg><use href="/assets/img/icons.svg#settings"/></svg>Tools</span><span class="on"><svg><use href="/assets/img/icons.svg#shield"/></svg>Admin</span><span><svg><use href="/assets/img/icons.svg#file"/></svg>Call Log</span></div>
+                </div>
+                <span class="pin" data-pin="1" style="--x:8%;--y:24%">1</span>
+                <span class="pin" data-pin="2" style="--x:8%;--y:40%">2</span>
+                <span class="pin" data-pin="3" style="--x:8%;--y:62%">3</span>
+              </div>
+              <div class="spot-float push-card hide-sm" style="top:auto;bottom:14%">
+                <span class="float-icon" style="background:#e4f7ef;color:var(--green)"><svg><use href="/assets/img/icons.svg#trending"/></svg></span>
+                <div><b>+9 interested leads</b><small>Diya Nair · today</small></div>
+              </div>
+            </div>
+            <div class="spot-copy" data-reveal>
+              <span class="eyebrow">For admins · Dashboard</span>
+              <h3>Your whole floor on one screen</h3>
+              <p>See how today is going the moment you open the app. You don't need to ask agents for updates or collect sheets at the end of the day.</p>
+              <ol class="notes">
+                <li data-note="1"><span class="num">1</span><div><b>Calls and average talk time</b><p>For today or any date you pick, updated as calls end.</p></div></li>
+                <li data-note="2"><span class="num">2</span><div><b>Outcome breakdown</b><p>How many leads were interested, want a callback or said no.</p></div></li>
+                <li data-note="3"><span class="num">3</span><div><b>Agent leaderboard</b><p>Rank agents by calls, average talk time and interested leads.</p></div></li>
+              </ol>
+            </div>
+          </article>
+
+          <!-- 5. Attendance (landscape table) -->
+          <article class="spot" data-spot>
+            <div class="spot-visual wide" data-reveal aria-hidden="true">
+              <div class="phone landscape">
+                <div class="m">
+                  <div class="m-top"><span class="m-back"><svg><use href="/assets/img/icons.svg#arrow-left"/></svg></span><h4>Diya Nair<small>15-Sep-2026 → 24-Sep-2026</small></h4><span class="m-ico"><svg><use href="/assets/img/icons.svg#calendar"/></svg></span></div>
+                  <div class="m-body">
+                    <table class="m-table">
+                      <tr><th>Date</th><th>Day</th><th>Attendance</th><th>Assigned</th><th>Calls made</th><th>Total duration</th><th>Avg</th><th>Interested</th></tr>
+                      <tr><td>15-Sep</td><td>Tuesday</td><td class="pr">Present</td><td>40</td><td>112</td><td>1h 34m</td><td>50s</td><td>6</td></tr>
+                      <tr><td>16-Sep</td><td>Wednesday</td><td class="pr">Present</td><td>40</td><td>128</td><td>1h 49m</td><td>51s</td><td>8</td></tr>
+                      <tr><td>17-Sep</td><td>Thursday</td><td class="ab">Absent</td><td>0</td><td>0</td><td>0s</td><td>0s</td><td>0</td></tr>
+                      <tr><td>18-Sep</td><td>Friday</td><td class="pr">Present</td><td>40</td><td>119</td><td>1h 41m</td><td>51s</td><td>7</td></tr>
+                      <tr><td>19-Sep</td><td>Saturday</td><td class="wk">Weekend</td><td>0</td><td>0</td><td>0s</td><td>0s</td><td>0</td></tr>
+                      <tr><td>20-Sep</td><td>Sunday</td><td class="wk">Weekend</td><td>0</td><td>0</td><td>0s</td><td>0s</td><td>0</td></tr>
+                      <tr><td>21-Sep</td><td>Monday</td><td class="pr">Present</td><td>40</td><td>137</td><td>2h 02m</td><td>53s</td><td>9</td></tr>
+                    </table>
+                  </div>
+                </div>
+                <span class="pin" data-pin="1" style="--x:41.5%;--y:38%">1</span>
+                <span class="pin" data-pin="2" style="--x:41.5%;--y:74%">2</span>
+                <span class="pin" data-pin="3" style="--x:92%;--y:14%">3</span>
+              </div>
+            </div>
+            <div class="spot-copy" data-reveal>
+              <span class="eyebrow">For admins · Attendance &amp; Performance</span>
+              <h3>Attendance fills itself in</h3>
+              <p>Every agent gets a day-by-day report built from their calls. Nobody marks attendance and nothing can be faked. Turn the phone sideways for the full table.</p>
+              <ol class="notes">
+                <li data-note="1"><span class="num">1</span><div><b>Present means they made calls</b><p>A day counts as present when the agent made at least one call.</p></div></li>
+                <li data-note="2"><span class="num">2</span><div><b>Weekends are marked for you</b><p>Saturdays and Sundays never show up as absences.</p></div></li>
+                <li data-note="3"><span class="num">3</span><div><b>Any date range</b><p>Leads assigned, calls, total and average talk time and new interested leads for any From–To range.</p></div></li>
+              </ol>
+            </div>
+          </article>
+
+          <!-- 6. WhatsApp inbox -->
+          <article class="spot" data-spot>
+            <div class="spot-visual" data-reveal aria-hidden="true">
+              <div class="phone">
+                <div class="m">
+                  <div class="m-top"><h4>WhatsApp</h4><span class="m-ico"><svg><use href="/assets/img/icons.svg#plus"/></svg></span></div>
+                  <div class="m-body flush">
+                    <div style="padding:10px 12px;display:grid;gap:7px;background:#fff;border-bottom:1px solid var(--line)">
+                      <div class="m-search"><svg><use href="/assets/img/icons.svg#search"/></svg>Search contacts…</div>
+                      <div class="m-chips"><span class="m-chip date">Lead Date: Sep 24</span><span class="m-chip on">All Chats</span><span class="m-chip">Diya Nair</span><span class="m-chip">Aarav</span></div>
+                    </div>
+                    <div class="m-chat"><span class="m-av p lg">IR</span><div class="m-name"><b>Ishita Rao</b><div class="msg">Is the session on Sunday?</div><span>+91 98••• ••412</span><span class="m-tag">Diya Nair</span></div><div><time>11:28 AM</time><span class="m-unread">2</span></div></div>
+                    <div class="m-chat"><span class="m-av p lg">TM</span><div class="m-name"><b>Tara Menon</b><div class="msg">Registration link sent</div><span>+91 99••• ••730</span><span class="m-tag">Aarav Mehta</span></div><time>10:02 AM</time></div>
+                    <div class="m-chat"><span class="m-av p lg">NJ</span><div class="m-name"><b>Nikhil Jain</b><div class="msg">Thanks, I'll join tomorrow</div><span>+91 88••• ••519</span><span class="m-tag">Kabir Khanna</span></div><time>9:47 AM</time></div>
+                  </div>
+                  <div class="m-tabbar"><span><svg><use href="/assets/img/icons.svg#users"/></svg>Lead</span><span><svg><use href="/assets/img/icons.svg#file"/></svg>Call Log</span><span class="on"><svg><use href="/assets/img/icons.svg#chat"/></svg>WhatsApp</span></div>
+                </div>
+                <span class="pin" data-pin="1" style="--x:92%;--y:23%">1</span>
+                <span class="pin" data-pin="2" style="--x:64%;--y:39%">2</span>
+                <span class="pin" data-pin="3" style="--x:8%;--y:36%">3</span>
+              </div>
+              <div class="spot-float chat-card">
+                <div class="bubble in">Is the session on Sunday?<time>11:27</time></div>
+                <div class="bubble out">Yes, 11 AM. I've sent you the link 👍<time>11:28 <b>✓✓</b></time></div>
+              </div>
+            </div>
+            <div class="spot-copy" data-reveal>
+              <span class="eyebrow">For admins &amp; agents · WhatsApp</span>
+              <h3>Follow up where your leads already are</h3>
+              <p>Registration links, reminders and replies go through the official WhatsApp Business Platform, in the same app you call from.</p>
+              <ol class="notes">
+                <li data-note="1"><span class="num">1</span><div><b>Filter by lead date or agent</b><p>See one batch or one agent's conversations.</p></div></li>
+                <li data-note="2"><span class="num">2</span><div><b>See who owns each lead</b><p>Every chat shows which agent the lead belongs to.</p></div></li>
+                <li data-note="3"><span class="num">3</span><div><b>Reply in the thread</b><p>Open any chat to read and answer, with delivery and read ticks.</p></div></li>
+              </ol>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">Features</span>
+          <h2>Everything your calling floor needs, <span class="gradient-text">in one app</span></h2>
+          <p>Built around one loop: the admin assigns a lead, the agent calls it and marks the outcome. Everything else is there to make that loop faster.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature" data-reveal>
+            <div class="feature-icon"><svg aria-hidden="true"><use href="/assets/img/icons.svg#phone"/></svg></div>
+            <h3>One-tap native calling</h3>
+            <p>Agents call straight from the lead card on their own SIM, so there's no VoIP lag and no extra telecom bill. Call length is captured automatically.</p>
+          </article>
+          <article class="feature" data-reveal style="--delay:.08s">
+            <div class="feature-icon"><svg aria-hidden="true"><use href="/assets/img/icons.svg#check-circle"/></svg></div>
+            <h3>Outcome tracking</h3>
+            <p>Interested, Callback, Called or Not Interested, plus a note, logged the moment the call ends. Every call builds up the lead's history.</p>
+          </article>
+          <article class="feature" data-reveal style="--delay:.16s">
+            <div class="feature-icon"><svg aria-hidden="true"><use href="/assets/img/icons.svg#sheet"/></svg></div>
+            <h3>Google Sheets import</h3>
+            <p>Paste a sheet link, connect, and split the leads across your agents in seconds. You don't have to copy and paste anything.</p>
+          </article>
+          <article class="feature" data-reveal>
+            <div class="feature-icon"><svg aria-hidden="true"><use href="/assets/img/icons.svg#chat"/></svg></div>
+            <h3>WhatsApp inbox</h3>
+            <p>Follow up with leads on the official WhatsApp Business Platform and read their replies without leaving the app.</p>
+          </article>
+          <article class="feature" data-reveal style="--delay:.08s">
+            <div class="feature-icon"><svg aria-hidden="true"><use href="/assets/img/icons.svg#bell"/></svg></div>
+            <h3>Instant lead alerts</h3>
+            <p>A push notification goes to the agent as soon as new leads are assigned to them, so fresh leads get called first.</p>
+          </article>
+          <article class="feature" data-reveal style="--delay:.16s">
+            <div class="feature-icon"><svg aria-hidden="true"><use href="/assets/img/icons.svg#chart"/></svg></div>
+            <h3>Attendance &amp; performance</h3>
+            <p>Calls made, talk time and new interested leads for every agent, day by day. Present or absent shows up automatically.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Roles -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">Built for both sides</span>
+          <h2>One app for the manager and the calling floor</h2>
+        </div>
+        <div class="roles">
+          <div class="role role-dark" data-reveal>
+            <span class="eyebrow">For admins</span>
+            <h3>See every call without asking</h3>
+            <ul class="checklist">
+              <li><svg aria-hidden="true"><use href="/assets/img/icons.svg#check"/></svg>Add agents, reset passwords and manage your team from your phone</li>
+              <li><svg aria-hidden="true"><use href="/assets/img/icons.svg#check"/></svg>Import leads from Google Sheets and assign them in bulk</li>
+              <li><svg aria-hidden="true"><use href="/assets/img/icons.svg#check"/></svg>See each agent's calls, outcomes and attendance</li>
+              <li><svg aria-hidden="true"><use href="/assets/img/icons.svg#check"/></svg>Run WhatsApp follow-ups from a shared inbox</li>
+            </ul>
+          </div>
+          <div class="role" data-reveal style="--delay:.1s">
+            <span class="eyebrow">For agents</span>
+            <h3>Less admin, more calls</h3>
+            <ul class="checklist">
+              <li><svg aria-hidden="true"><use href="/assets/img/icons.svg#check"/></svg>Today's leads in one clean list, with new leads first</li>
+              <li><svg aria-hidden="true"><use href="/assets/img/icons.svg#check"/></svg>Tap to call, and log the outcome as soon as you hang up</li>
+              <li><svg aria-hidden="true"><use href="/assets/img/icons.svg#check"/></svg>Full call history on every lead before you dial</li>
+              <li><svg aria-hidden="true"><use href="/assets/img/icons.svg#check"/></svg>A notification the moment new leads are yours</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Security -->
+    <section class="section security" id="security">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">Privacy &amp; security</span>
+          <h2>Your leads are your business, and nobody else's</h2>
+          <p>We collect only what the app needs to work, keep it in India and delete it on a fixed schedule.</p>
+        </div>
+        <div class="sec-grid">
+          <div class="sec-item" data-reveal><svg aria-hidden="true"><use href="/assets/img/icons.svg#pin"/></svg><h3>Hosted in India</h3><p>Your data is stored on servers in India, close to your team.</p></div>
+          <div class="sec-item" data-reveal style="--delay:.08s"><svg aria-hidden="true"><use href="/assets/img/icons.svg#lock"/></svg><h3>Encrypted in transit</h3><p>Everything between the app and our servers travels over HTTPS.</p></div>
+          <div class="sec-item" data-reveal style="--delay:.16s"><svg aria-hidden="true"><use href="/assets/img/icons.svg#shield"/></svg><h3>Hashed passwords</h3><p>Passwords are never stored as plain text. Changing a password signs out every other device.</p></div>
+          <div class="sec-item" data-reveal><svg aria-hidden="true"><use href="/assets/img/icons.svg#users"/></svg><h3>Role-based access</h3><p>Agents see only their own leads, and admins see only their own team.</p></div>
+          <div class="sec-item" data-reveal style="--delay:.08s"><svg aria-hidden="true"><use href="/assets/img/icons.svg#clock"/></svg><h3>Short retention</h3><p>Lead and call records are deleted automatically after 20 days at most.</p></div>
+          <div class="sec-item" data-reveal style="--delay:.16s"><svg aria-hidden="true"><use href="/assets/img/icons.svg#eye-off"/></svg><h3>No ads, no selling</h3><p>We never sell data, never show ads and never record your calls.</p></div>
+        </div>
+        <p class="sec-foot" data-reveal>Read the full <a href="/privacy/">Privacy Policy</a>.</p>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">FAQ</span>
+          <h2>Questions, answered</h2>
+        </div>
+        <div class="faq-list" data-reveal>
+          <details>
+            <summary>Which phones does CallerCRM work on?</summary>
+            <p>CallerCRM is available for Android phones and is currently in closed testing on Google Play. Email us to join the test.</p>
+          </details>
+          <details>
+            <summary>Do calls go through the internet or my SIM?</summary>
+            <p>Your SIM. CallerCRM starts a normal phone call using your phone's dialer, so your usual carrier plan applies and call quality is the same as any other call.</p>
+          </details>
+          <details>
+            <summary>Does CallerCRM record my calls?</summary>
+            <p>No. CallerCRM never records audio and doesn't ask for microphone access. After a call to a lead, it reads only that call's length from your phone's call log.</p>
+          </details>
+          <details>
+            <summary>Where is my data stored, and for how long?</summary>
+            <p>On secure servers in India. Lead, call and WhatsApp records are deleted automatically after at most 20 days. When an agent leaves, their account is removed within 24–48 hours. See the <a href="/privacy/">Privacy Policy</a> for details.</p>
+          </details>
+          <details>
+            <summary>Do I need to change how we use Google Sheets?</summary>
+            <p>No. Keep your leads in the sheet you already use. Share it by link, paste the link into CallerCRM and assign the leads. CallerCRM never asks for access to your Google account.</p>
+          </details>
+          <details>
+            <summary>How do I delete my account or data?</summary>
+            <p>Ask your admin, or follow the steps on our <a href="/delete-account/">account deletion page</a>.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="cta-box" data-reveal>
+          <h2>Ready to give your calling team a faster day?</h2>
+          <p>CallerCRM is in closed testing. Tell us about your team and we'll get you set up.</p>
+          <div class="cta-actions">
+            <a class="btn btn-light" href="mailto:privacy@codebyakshay.com?subject=CallerCRM%20early%20access">
+              <svg aria-hidden="true"><use href="/assets/img/icons.svg#mail"/></svg>
+              Request early access
+            </a>
+            <span class="play-badge" aria-label="Coming soon to Google Play">
+              <svg aria-hidden="true"><use href="/assets/img/icons.svg#play"/></svg>
+              <span><small>Coming soon to</small><b>Google Play</b></span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer (same markup on every page — see README) -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a class="brand" href="/"><img src="/assets/img/icon-192.png" alt="" width="36" height="36">CallerCRM</a>
+          <p>The calling CRM for tele-sales teams.<br>A product of CodeByAkshay, made in India.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="/#how">How it works</a></li>
+            <li><a href="/#tour">Product tour</a></li>
+            <li><a href="/#features">Features</a></li>
+            <li><a href="/#faq">FAQ</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="/privacy/">Privacy Policy</a></li>
+            <li><a href="/delete-account/">Delete your account</a></li>
+            <li><a href="mailto:privacy@codebyakshay.com">privacy@codebyakshay.com</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> CodeByAkshay. All rights reserved.</span>
+        <span>Udyam Registration No. UDYAM-MP-15-0022478</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

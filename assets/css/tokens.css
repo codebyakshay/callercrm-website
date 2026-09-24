@@ -1,0 +1,52 @@
+/* Design tokens — the only place colours, spacing and type sizes are defined.
+   Brand colours match the app (src/styles/tokens.ts → brandPalette). */
+:root {
+  /* Brand */
+  --purple: #8c56d4;
+  --purple-dark: #7440bd;
+  --purple-deep: #5b2e9e;
+  --lavender: #dc95ff;
+  --pink: #ffbefb;
+  --cream: #fff4bf;
+
+  /* Surfaces & text */
+  --bg: #fcfaff;
+  --bg-soft: #f5edff;
+  --surface: #ffffff;
+  --ink: #1d1330;
+  --ink-soft: #4a3d63;
+  --muted: #6f6485;
+  --line: #ece3f8;
+  --night: #140c24;
+  --night-2: #1f1436;
+
+  /* Status (used in the app mockup) */
+  --green: #1fb57a;
+  --amber: #f0a92e;
+  --red: #e5566b;
+
+  --grad-brand: linear-gradient(135deg, #a974ec 0%, #8c56d4 45%, #6b3bbf 100%);
+  --grad-text: linear-gradient(100deg, #8c56d4 0%, #c56ff0 50%, #f28ad8 100%);
+
+  /* Type */
+  --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fs-xs: 0.8125rem;
+  --fs-sm: 0.9375rem;
+  --fs-md: 1.0625rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: clamp(1.6rem, 1.2rem + 1.6vw, 2.4rem);
+  --fs-hero: clamp(2.4rem, 1.4rem + 4.2vw, 4.4rem);
+
+  /* Spacing, radius, shadow */
+  --space-section: clamp(4.5rem, 3rem + 6vw, 8rem);
+  --container: 1180px;
+  --gutter: clamp(1rem, 0.5rem + 2.5vw, 2rem);
+  --radius-sm: 10px;
+  --radius: 18px;
+  --radius-lg: 28px;
+  --shadow-sm: 0 1px 2px rgb(29 19 48 / 0.06), 0 2px 8px rgb(29 19 48 / 0.04);
+  --shadow: 0 10px 30px -10px rgb(76 38 140 / 0.25);
+  --shadow-lg: 0 30px 80px -20px rgb(76 38 140 / 0.45);
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
