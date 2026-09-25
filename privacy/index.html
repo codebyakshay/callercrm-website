@@ -52,7 +52,7 @@
         <h1 data-rise style="--delay:.06s">Privacy Policy</h1>
         <p data-rise style="--delay:.12s">This policy explains what personal data CallerCRM collects, why we collect it, who we share it with, how long we keep it, and the choices and rights you have.</p>
         <div class="legal-meta" data-rise style="--delay:.18s">
-          <span class="pill">Effective 24 September 2026</span>
+          <span class="pill">Effective 25 September 2026</span>
           <span class="pill">Applies to the CallerCRM Android app and its servers</span>
         </div>
       </div>
@@ -146,7 +146,7 @@
             <li>We <strong>do not record calls</strong> or access your microphone.</li>
             <li>We do not access your location, contacts or address book, photos, files, camera or SMS.</li>
             <li>We do not collect your advertising ID and do not track you across other apps or websites.</li>
-            <li>We do not ask for access to your Google account. Lead import reads only the specific Google Sheet link your Admin provides.</li>
+            <li>We do not ask for access to your Google account. Lead import reads only the specific Google Sheet link your Admin provides. If your Organisation sets up a lead export sheet and shares it with our export account, we write leads to that sheet only.</li>
             <li>We do not collect payment card or bank details in the app.</li>
           </ul>
         </section>
@@ -192,7 +192,7 @@
                 <tr><td>Amazon Web Services</td><td>Hosting our servers and database in India</td><td>All data described in this policy</td></tr>
                 <tr><td>Meta Platforms (WhatsApp Business Platform)</td><td>Sending and receiving WhatsApp messages with Leads</td><td>Lead phone numbers and names, message content</td></tr>
                 <tr><td>Expo (650 Industries, Inc.) and Google Firebase Cloud Messaging</td><td>Delivering push notifications; anonymous app usage statistics</td><td>Push token, notification content, app and OS version</td></tr>
-                <tr><td>Google (Google Sheets API)</td><td>Reading the lead sheet an Admin links to</td><td>The sheet link and the contents of that sheet</td></tr>
+                <tr><td>Google (Google Sheets API)</td><td>Reading the lead sheet an Admin links to; writing leads that were never reached to the Organisation's own export sheet</td><td>The sheet link and the contents of that sheet; for the export: lead name, phone number, status, Agent name and dates</td></tr>
                 <tr><td>Google Play</td><td>Distributing and updating the app</td><td>As described in Google's own privacy policy</td></tr>
               </tbody>
             </table>
@@ -207,7 +207,7 @@
           <h2>Storage, retention &amp; deletion</h2>
           <p>Our servers and database are hosted in India.</p>
           <ul>
-            <li><strong>Leads, call activity and WhatsApp messages</strong> are kept for no more than <strong>20 days</strong> from when they are created, then permanently deleted.</li>
+            <li><strong>Leads, call activity and WhatsApp messages</strong> are kept for no more than <strong>20 days</strong> from when they are created, then permanently deleted. Before that, leads your Agents never reached (not called, or called with no answer) are copied once a day to your Organisation's own Google Sheet, which your Organisation controls.</li>
             <li><strong>Agent accounts</strong> are kept while the Agent works for the Organisation. When an Agent leaves, the Admin deletes the account within <strong>24–48 hours</strong>. Deleting an account also deletes its sign-in sessions, push tokens, lead assignments and call activity.</li>
             <li><strong>Admin and Organisation accounts</strong> are kept until the Organisation asks us to close them. We then delete them and all associated data.</li>
             <li><strong>Sign-in sessions</strong> expire automatically, and all of them are ended when a password is changed.</li>
