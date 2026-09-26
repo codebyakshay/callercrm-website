@@ -117,6 +117,22 @@ function initToc() {
   });
 }
 
+// Pricing: monthly / annual switch.
+function initPricing() {
+  const buttons = document.querySelectorAll("[data-billing]");
+  if (!buttons.length) return;
+  buttons.forEach((btn) => btn.addEventListener("click", () => {
+    const annual = btn.dataset.billing === "annual";
+    buttons.forEach((b) => {
+      const on = b === btn;
+      b.classList.toggle("is-on", on);
+      b.setAttribute("aria-pressed", String(on));
+    });
+    document.querySelectorAll("[data-monthly]").forEach((el) => (el.hidden = annual));
+    document.querySelectorAll("[data-annual]").forEach((el) => (el.hidden = !annual));
+  }));
+}
+
 function initYear() {
   document.querySelectorAll("[data-year]").forEach((el) => (el.textContent = new Date().getFullYear()));
 }
@@ -127,4 +143,5 @@ initCardGlow();
 initHeroDemo();
 initTour();
 initToc();
+initPricing();
 initYear();

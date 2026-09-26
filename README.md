@@ -9,6 +9,7 @@ It uses plain HTML, CSS and JS, with no build step and no dependencies. It is ho
 index.html               Landing page
 privacy/index.html       Privacy Policy          → /privacy/        (link this in Play Console)
 delete-account/index.html Account deletion steps → /delete-account/ (Play "Delete account URL")
+terms/index.html         Terms of Service        → /terms/
 404.html                 GitHub Pages not-found page
 assets/
   css/tokens.css         Colours, type sizes, spacing (the only place to change the brand look)
@@ -25,7 +26,7 @@ CNAME                    Custom domain for GitHub Pages
 robots.txt, sitemap.xml  SEO
 ```
 
-The header and footer markup is repeated in each HTML page (4 pages). If you change a nav link, change it in all of them:
+The header and footer markup is repeated in each HTML page (index, privacy, delete-account, terms). If you change a nav link, change it in all of them:
 
 ```bash
 grep -l 'class="site-header"' -r .
