@@ -133,7 +133,7 @@
 
           <h3>5. Device and technical information</h3>
           <ul>
-            <li><strong>Push notification token</strong>: lets us notify an Agent when new leads are assigned.</li>
+            <li><strong>Push notification token</strong>: lets us notify an Agent when new leads are assigned, when a lead replies on WhatsApp, and once when a callback they scheduled is due.</li>
             <li><strong>App installation ID</strong>: a random identifier CallerCRM creates when first installed. It keeps you signed in on each device separately. It is not your IMEI, serial number or advertising ID.</li>
             <li><strong>Platform and app version</strong>, for example "android" and "1.0.0".</li>
             <li><strong>Server logs</strong>: IP address, time and the address of each request. We use these for security (for example, limiting repeated failed sign-ins) and troubleshooting.</li>
@@ -164,7 +164,7 @@
                 <tr><td>Make and manage phone calls<br><code>CALL_PHONE</code></td><td>To call a Lead directly from the app when you tap the call button.</td><td>You can't place calls from CallerCRM.</td></tr>
                 <tr><td>Read phone status<br><code>READ_PHONE_STATE</code></td><td>To detect when the call you started connects and ends, so the app can ask for the outcome at the right moment.</td><td>The app can't tell when a call ends.</td></tr>
                 <tr><td>Read call log<br><code>READ_CALL_LOG</code></td><td>To read the duration of the call you just placed to a Lead (see "How call duration is read" above).</td><td>Call duration is not recorded.</td></tr>
-                <tr><td>Notifications<br><code>POST_NOTIFICATIONS</code></td><td>To alert you when new leads are assigned or team settings change.</td><td>You won't get lead alerts.</td></tr>
+                <tr><td>Notifications<br><code>POST_NOTIFICATIONS</code></td><td>To alert you when new leads are assigned, a lead replies, or a callback you scheduled is due.</td><td>You won't get lead alerts.</td></tr>
                 <tr><td>Internet, vibration</td><td>To sync with our servers and to vibrate for notifications.</td><td>—</td></tr>
               </tbody>
             </table>
@@ -195,7 +195,7 @@
                 <tr><td>Amazon Web Services</td><td>Hosting our servers and database in India</td><td>All data described in this policy</td></tr>
                 <tr><td>Meta Platforms (WhatsApp Business Platform)</td><td>Sending and receiving WhatsApp messages with Leads</td><td>Lead phone numbers and names, message content</td></tr>
                 <tr><td>Expo (650 Industries, Inc.) and Google Firebase Cloud Messaging</td><td>Delivering push notifications; anonymous app usage statistics</td><td>Push token, notification content, app and OS version</td></tr>
-                <tr><td>Google (Google Sheets API)</td><td>Reading the lead sheet an Admin links to; writing leads that were never reached to the Organisation's own export sheet</td><td>The sheet link and the contents of that sheet; for the export: lead name, phone number, status, Agent name and dates</td></tr>
+                <tr><td>Google (Google Sheets API)</td><td>Reading the lead sheet an Admin links to; writing leads that were never reached, or asked to be called back, to the Organisation's own export sheet</td><td>The sheet link and the contents of that sheet; for the export: lead name, phone number, status, Agent name and dates</td></tr>
                 <tr><td>Google Play</td><td>Distributing and updating the app</td><td>As described in Google's own privacy policy</td></tr>
                 <tr><td>Cloudflare, Inc. (R2 storage)</td><td>Storing nightly backup copies of our database for up to 7 days</td><td>All data in our database, encrypted on our server before it is sent, so Cloudflare cannot read it</td></tr>
               </tbody>
@@ -212,7 +212,7 @@
           <h2>Storage, retention &amp; deletion</h2>
           <p>Our servers and database are hosted in India. Encrypted backup copies are also stored with Cloudflare, which may keep them outside India (see <a href="#sharing">Sharing</a>).</p>
           <ul>
-            <li><strong>Leads, call activity and WhatsApp messages</strong> are kept for no more than <strong>20 days</strong> from when they are created, then permanently deleted. Before that, if your Organisation has set up an export sheet, leads your Agents never reached (not called, or called with no answer) are copied once a day to that Google Sheet, which your Organisation controls. If copying to the sheet fails, we may keep your Organisation's data for up to 5 more days so the problem can be fixed, and then delete it anyway.</li>
+            <li><strong>Leads, call activity and WhatsApp messages</strong> are kept for no more than <strong>20 days</strong> from when they are created, then permanently deleted. Before that, if your Organisation has set up an export sheet, leads your Agents never reached (not called, or called with no answer) and leads that asked to be called back are copied once a day to that Google Sheet, which your Organisation controls. If copying to the sheet fails, we may keep your Organisation's data for up to 5 more days so the problem can be fixed, and then delete it anyway.</li>
             <li><strong>Backups:</strong> we back up the database every night so we can recover from errors or outages. Backups are encrypted and kept on our server and with Cloudflare for no more than <strong>7 days</strong>, then deleted automatically. So data deleted from CallerCRM is also gone from our backups within 7 days.</li>
             <li><strong>Agent accounts</strong> are kept while the Agent works for the Organisation. When an Agent leaves, the Admin deletes the account within <strong>24–48 hours</strong>. Deleting an account also deletes its sign-in sessions, push tokens, lead assignments and call activity.</li>
             <li><strong>Admin and Organisation accounts</strong> are kept until the Organisation asks us to close them. We then delete them and all associated data.</li>
