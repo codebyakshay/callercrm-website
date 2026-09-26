@@ -53,7 +53,7 @@
         <h1 data-rise style="--delay:.06s">Privacy Policy</h1>
         <p data-rise style="--delay:.12s">This policy explains what personal data CallerCRM collects, why we collect it, who we share it with, how long we keep it, and the choices and rights you have.</p>
         <div class="legal-meta" data-rise style="--delay:.18s">
-          <span class="pill">Effective 25 September 2026</span>
+          <span class="pill">Effective 27 September 2026</span>
           <span class="pill">Applies to the CallerCRM Android app and its servers</span>
         </div>
       </div>
@@ -87,7 +87,8 @@
             <li>CallerCRM is a business app. Organisations use it to assign sales leads to their calling agents, place calls and log the results.</li>
             <li>We collect only what the app needs to work: account details, the leads your organisation uploads, call outcomes and durations, WhatsApp conversations with leads, and basic device information for notifications and sign-in.</li>
             <li><strong>We never record calls</strong>, never access your microphone, location, contacts, photos or SMS, and never sell data or show ads.</li>
-            <li>Data is stored on servers in India. Lead, call and WhatsApp records are deleted automatically within <strong>20 days</strong>. When an agent leaves their organisation, their account is deleted within <strong>24–48 hours</strong>.</li>
+            <li>Data is stored on servers in India. Lead, call and WhatsApp records are deleted automatically within <strong>20 days</strong>, and our encrypted backups are deleted after <strong>7 days</strong>. When an agent leaves their organisation, their account is deleted within <strong>24–48 hours</strong>.</li>
+            <li>Each organisation's data is kept separate from every other organisation's.</li>
             <li>You can ask us to access, correct or delete your data at any time by writing to <a href="mailto:privacy@codebyakshay.com">privacy@codebyakshay.com</a>.</li>
           </ul>
         </section>
@@ -117,7 +118,8 @@
           <h2>Data we collect</h2>
 
           <h3>1. Account information</h3>
-          <p>For Admins and Agents: name, username, password, phone number (optional), role (Admin or Agent), and which Admin an Agent belongs to. Passwords are stored only as a one-way cryptographic hash (bcrypt). Nobody can read your password, including us.</p>
+          <p>For Admins and Agents: name, username, password, phone number (optional), role (Admin or Agent), the Organisation they belong to, and which Admin an Agent belongs to. Passwords are stored only as a one-way cryptographic hash (bcrypt). Nobody can read your password, including us.</p>
+          <p>For each Organisation: its name, plan, number of callers allowed and billing dates. If it uses WhatsApp on its own number: its WhatsApp phone number ID, access token (stored encrypted) and the names of its message templates.</p>
 
           <h3>2. Lead information (provided by your Organisation)</h3>
           <p>Lead name and phone number, the link to the Google Sheet they were imported from, which Agent they are assigned to, the assignment date and the lead's current status.</p>
@@ -195,20 +197,23 @@
                 <tr><td>Expo (650 Industries, Inc.) and Google Firebase Cloud Messaging</td><td>Delivering push notifications; anonymous app usage statistics</td><td>Push token, notification content, app and OS version</td></tr>
                 <tr><td>Google (Google Sheets API)</td><td>Reading the lead sheet an Admin links to; writing leads that were never reached to the Organisation's own export sheet</td><td>The sheet link and the contents of that sheet; for the export: lead name, phone number, status, Agent name and dates</td></tr>
                 <tr><td>Google Play</td><td>Distributing and updating the app</td><td>As described in Google's own privacy policy</td></tr>
+                <tr><td>Cloudflare, Inc. (R2 storage)</td><td>Storing nightly backup copies of our database for up to 7 days</td><td>All data in our database, encrypted on our server before it is sent, so Cloudflare cannot read it</td></tr>
               </tbody>
             </table>
           </div>
           <p>Some of these providers may process data outside India, under their own security and privacy commitments.</p>
-          <p><strong>Within your Organisation:</strong> Admins can see the leads, call activity, outcomes, notes and attendance of the Agents in their team. Agents can see only the leads assigned to them.</p>
+          <p><strong>Within your Organisation:</strong> Admins can see the leads, call activity, outcomes, notes and attendance of the Agents in their team. Agents can see only the leads assigned to them. No other Organisation can see your data.</p>
+          <p><strong>Our own access:</strong> we manage Organisations (plans, callers allowed, WhatsApp setup) from an internal admin panel. For your Organisation's activity it shows only totals, such as the number of calls or leads per Agent, never lead names, phone numbers, notes or messages, and every time we view it, that access is logged. We look at other data only when you ask for support, to fix a problem, or when the law requires it.</p>
           <p><strong>Legal reasons:</strong> we may disclose data if required by law, a court order or a lawful request from a government authority, or to protect the rights, safety and security of our users or the public.</p>
           <p><strong>Business transfer:</strong> if CodeByAkshay is involved in a merger or acquisition, data may be transferred under this policy, and we will tell affected Organisations in advance.</p>
         </section>
 
         <section id="retention">
           <h2>Storage, retention &amp; deletion</h2>
-          <p>Our servers and database are hosted in India.</p>
+          <p>Our servers and database are hosted in India. Encrypted backup copies are also stored with Cloudflare, which may keep them outside India (see <a href="#sharing">Sharing</a>).</p>
           <ul>
-            <li><strong>Leads, call activity and WhatsApp messages</strong> are kept for no more than <strong>20 days</strong> from when they are created, then permanently deleted. Before that, leads your Agents never reached (not called, or called with no answer) are copied once a day to your Organisation's own Google Sheet, which your Organisation controls.</li>
+            <li><strong>Leads, call activity and WhatsApp messages</strong> are kept for no more than <strong>20 days</strong> from when they are created, then permanently deleted. Before that, if your Organisation has set up an export sheet, leads your Agents never reached (not called, or called with no answer) are copied once a day to that Google Sheet, which your Organisation controls.</li>
+            <li><strong>Backups:</strong> we back up the database every night so we can recover from errors or outages. Backups are encrypted and kept on our server and with Cloudflare for no more than <strong>7 days</strong>, then deleted automatically. So data deleted from CallerCRM is also gone from our backups within 7 days.</li>
             <li><strong>Agent accounts</strong> are kept while the Agent works for the Organisation. When an Agent leaves, the Admin deletes the account within <strong>24–48 hours</strong>. Deleting an account also deletes its sign-in sessions, push tokens, lead assignments and call activity.</li>
             <li><strong>Admin and Organisation accounts</strong> are kept until the Organisation asks us to close them. We then delete them and all associated data.</li>
             <li><strong>Sign-in sessions</strong> expire automatically, and all of them are ended when a password is changed.</li>
@@ -223,7 +228,10 @@
           <ul>
             <li>All traffic between the app and our servers is encrypted with HTTPS (TLS).</li>
             <li>Passwords are stored only as bcrypt hashes. Changing your own password requires your current one, and a change signs out every device.</li>
+            <li>Each Organisation's data is kept separate: users of one Organisation can never see another Organisation's leads, calls or messages.</li>
             <li>Access is role-based: Agents see only their own leads, and Admins see only their own team.</li>
+            <li>Each Organisation's WhatsApp access credentials are stored encrypted, and so are our database backups.</li>
+            <li>Our internal admin panel needs a password and a one-time code from an authenticator app, and every action in it is logged.</li>
             <li>Repeated failed sign-in attempts are rate-limited.</li>
             <li>We check the cryptographic signature on incoming WhatsApp webhook messages, so only genuine messages from Meta are accepted.</li>
             <li>The release app does not write personal data such as phone numbers to device logs.</li>
