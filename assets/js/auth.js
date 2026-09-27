@@ -27,8 +27,33 @@ async function post(path, body, url = API + path) {
 }
 
 // Google's token ran out (or was refused): back to the Google step with the reason.
+// The Google sign-in is shared by the sign-up, account and reset pages for this tab, so the
+// person picks their Google account once. Google's token is valid ~1 hour; we drop it a minute early.
+const STORE_KEY = "callercrm.google";
+function saveCredential(token) {
+  try { sessionStorage.setItem(STORE_KEY, token); } catch { /* private mode: they'll sign in per page */ }
+}
+function savedCredential() {
+  try {
+    const token = sessionStorage.getItem(STORE_KEY);
+    if (!token) return null;
+    const { exp } = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    if (exp * 1000 > Date.now() + 60000) return token;
+    sessionStorage.removeItem(STORE_KEY);
+  } catch { /* unreadable: sign in again */ }
+  return null;
+}
+function forgetCredential() {
+  try { sessionStorage.removeItem(STORE_KEY); } catch { /* nothing stored */ }
+}
+const planQuery = () => {
+  const plan = new URLSearchParams(location.search).get("plan");
+  return plan === "starter" || plan === "pro" ? `?plan=${plan}` : "";
+};
+
 function restartGoogle(message) {
   credential = null;
+  forgetCredential();
   $("#google-error").textContent = message;
   show("google");
 }
@@ -52,8 +77,11 @@ function initPasswordToggles() {
 }
 
 // autoSelect: returning admins on the account page are signed straight back in (no website session to keep).
-function initGoogle(onCredential, autoSelect = false) {
+function initGoogle(onCredentialRaw, autoSelect = false) {
   const slot = $("#google-button");
+  const onCredential = (token) => { saveCredential(token); onCredentialRaw(token); };
+  const saved = savedCredential();
+  if (saved) onCredentialRaw(saved); // already signed in on another page in this tab
   const start = () => {
     google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
@@ -66,7 +94,7 @@ function initGoogle(onCredential, autoSelect = false) {
       theme: "outline", size: "large", shape: "pill", text: "continue_with", logo_alignment: "center",
       width: Math.min(340, slot.clientWidth || 340),
     });
-    if (autoSelect) google.accounts.id.prompt();
+    if (autoSelect && !saved) google.accounts.id.prompt();
   };
   if (window.google?.accounts?.id) start();
   else window.addEventListener("google-loaded", start, { once: true });
@@ -90,11 +118,9 @@ function initSignup() {
     if (!ok) return restartGoogle(data.error || "Google sign-in didn't work. Please try again.");
     credential = token;
     if (data.exists) {
-      $("#exists-login").textContent = data.email;
-      $("#exists-username").textContent = data.username;
-      const planParam = new URLSearchParams(location.search).get("plan");
-      if (PLANS[planParam]) $("#exists-account").href = `/account/?plan=${planParam}`;
-      return show("exists");
+      // Already has a company: their account page (plan picker) is where they want to be.
+      location.replace(`/account/${planQuery()}`);
+      return;
     }
     $("#who-email").textContent = data.email;
     if (!form.name.value) form.name.value = data.name || "";
@@ -133,8 +159,7 @@ function initSignup() {
     $("#done-ends").textContent = ends.toLocaleDateString("en-IN", { day: "numeric", month: "long", timeZone: "Asia/Kolkata" });
     const wa = `Hi, I just signed up for CallerCRM (${f.get("companyName")}). I'd like to connect our WhatsApp Business number.`;
     $("#done-whatsapp").href = `https://wa.me/917898131225?text=${encodeURIComponent(wa)}`;
-    const planParam = new URLSearchParams(location.search).get("plan");
-    if (PLANS[planParam]) $("#done-pay").href = `/account/?plan=${planParam}`;
+    $("#done-pay").href = `/account/${planQuery()}`;
     show("done");
   });
 }
@@ -324,10 +349,9 @@ function initAccount() {
     $("#google-error").textContent = "";
     const { ok, status, data } = await post("/account", { credential: token });
     if (status === 404) {
-      $("#none-email").textContent = data.email || "This Google account";
-      const wanted = new URLSearchParams(location.search).get("plan");
-      if (wanted === "starter" || wanted === "pro") $("#none-signup").href = `/signup/?plan=${wanted}`;
-      return show("none");
+      // No company for this Google account yet: create it (same Google sign-in, no second prompt).
+      location.replace(`/signup/${planQuery()}`);
+      return;
     }
     if (!ok) return restartGoogle(data.error || "Google sign-in didn't work. Please try again.");
     credential = token;
