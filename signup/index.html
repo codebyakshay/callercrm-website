@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Start your free trial — CallerCRM</title>
   <meta name="description" content="Start a free 14-day CallerCRM trial for your calling team: every Pro feature, up to 12 callers, no card needed.">
-  <meta name="robots" content="noindex">
   <link rel="canonical" href="https://callercrm.codebyakshay.com/signup/">
   <meta name="theme-color" content="#8c56d4">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
@@ -43,8 +42,9 @@
           <li><a href="/#security">Security</a></li>
           <li><a href="/#pricing">Pricing</a></li>
           <li><a href="/#faq">FAQ</a></li>
+          <li><a href="/account/">Log in</a></li>
         </ul>
-        <a class="btn btn-primary btn-sm" href="https://wa.me/917898131225?text=Hi%2C%20I%27d%20like%20to%20start%20a%20CallerCRM%20free%20trial.%0ACompany%3A%20%0ANumber%20of%20callers%3A%20" target="_blank" rel="noopener">Start free trial</a>
+        <a class="btn btn-primary btn-sm" href="/signup/">Start free trial</a>
       </div>
     </nav>
   </header>
@@ -56,6 +56,7 @@
           <span class="eyebrow">Free for 14 days</span>
           <h1>Start your free trial</h1>
           <p>Get your calling team on CallerCRM today. Every Pro feature, up to 12 callers, and no card needed.</p>
+          <p class="plan-pick" id="plan-pick" hidden></p>
           <div class="auth-receipt" aria-label="Your trial">
             <div><span>Plan</span><b>Pro, every feature</b></div>
             <div><span>Callers</span><b>Up to 12</b></div>
@@ -137,7 +138,7 @@
               <span>Email: <b id="exists-login"></b></span>
               <span>or username: <b id="exists-username"></b></span>
             </div>
-            <p class="auth-note">Forgot the password? <a href="/reset-password/">Reset it here</a>.</p>
+            <p class="auth-note"><a href="/account/">Open your account</a> · Forgot the password? <a href="/reset-password/">Reset it here</a>.</p>
           </div>
 
           <div class="auth-step" data-step="done" hidden>

@@ -49,20 +49,22 @@ function initPasswordToggles() {
   );
 }
 
-function initGoogle(onCredential) {
+// autoSelect: returning admins on the account page are signed straight back in (no website session to keep).
+function initGoogle(onCredential, autoSelect = false) {
   const slot = $("#google-button");
   const start = () => {
     google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: (r) => onCredential(r.credential),
       ux_mode: "popup",
-      auto_select: false,
+      auto_select: autoSelect,
       cancel_on_tap_outside: true,
     });
     google.accounts.id.renderButton(slot, {
       theme: "outline", size: "large", shape: "pill", text: "continue_with", logo_alignment: "center",
       width: Math.min(340, slot.clientWidth || 340),
     });
+    if (autoSelect) google.accounts.id.prompt();
   };
   if (window.google?.accounts?.id) start();
   else window.addEventListener("google-loaded", start, { once: true });
@@ -70,8 +72,15 @@ function initGoogle(onCredential) {
 window.onGoogleLibraryLoad = () => window.dispatchEvent(new Event("google-loaded"));
 
 // ── Sign up ─────────────────────────────────────────────────────────────
+const PLANS = { starter: "Starter (₹249/month)", pro: "Pro (₹499/month)" };
+
 function initSignup() {
   const form = $("#signup-form");
+  const picked = PLANS[new URLSearchParams(location.search).get("plan")];
+  if (picked) {
+    $("#plan-pick").textContent = `You picked ${picked}. Start with 14 days free of every Pro feature, then pay for your plan from your account.`;
+    $("#plan-pick").hidden = false;
+  }
 
   initGoogle(async (token) => {
     $("#google-error").textContent = "";
@@ -162,7 +171,78 @@ function initReset() {
   });
 }
 
+// ── Account ─────────────────────────────────────────────────────────────
+const PLAN_LABEL = { TRIAL: "Free trial · every Pro feature", STARTER: "Starter plan", PRO: "Pro plan" };
+const niceDay = (key) =>
+  new Date(`${key}T12:00:00+05:30`).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" });
+
+function initAccount() {
+  const form = $("#reset-form");
+
+  initGoogle(async (token) => {
+    $("#google-error").textContent = "";
+    const { ok, status, data } = await post("/account", { credential: token });
+    if (status === 404) {
+      $("#none-email").textContent = data.email || "This Google account";
+      return show("none");
+    }
+    if (!ok) return restartGoogle(data.error || "Google sign-in didn't work. Please try again.");
+    credential = token;
+    $("#acc-plan").textContent = PLAN_LABEL[data.plan] || data.plan;
+    $("#acc-company").textContent = data.company;
+    const st = $("#acc-status");
+    st.className = "acc-status";
+    if (data.suspended) {
+      st.classList.add("bad");
+      st.textContent = "This account is suspended. Message us on WhatsApp.";
+    } else if (data.notice) {
+      st.classList.add(data.notice.tone === "bad" ? "bad" : "warn");
+      st.textContent = `${data.notice.title}. ${data.notice.text}`;
+    } else if (data.paidUntil) {
+      st.textContent = data.plan === "TRIAL" ? `Trial runs until ${niceDay(data.paidUntil)}.` : `Paid until ${niceDay(data.paidUntil)}.`;
+    } else {
+      st.textContent = "Active.";
+    }
+    $("#acc-callers").textContent = data.seatLimit ? `${data.callers} of ${data.seatLimit} in use` : `${data.callers} in use`;
+    $("#acc-email").textContent = data.email;
+    $("#acc-username").textContent = data.username;
+    $("#who-email").textContent = data.email;
+    const msg = `Hi, I'd like to pay for CallerCRM.\nCompany: ${data.company}\nLogin: ${data.email}\nPlan (Starter / Pro, monthly / yearly): `;
+    $("#acc-pay").href = `https://wa.me/917898131225?text=${encodeURIComponent(msg)}`;
+    show("account");
+  }, true);
+
+  $("#acc-password-toggle").addEventListener("click", () => {
+    form.hidden = !form.hidden;
+    if (!form.hidden) form.password.focus();
+  });
+  document.querySelectorAll("[data-signout]").forEach((b) =>
+    b.addEventListener("click", () => {
+      window.google?.accounts?.id?.disableAutoSelect();
+      restartGoogle("");
+    }),
+  );
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    $("#reset-error").textContent = "";
+    $("#reset-saved").textContent = "";
+    if (!form.reportValidity()) return;
+    setBusy(form, true, "Saving…");
+    const { ok, status, data } = await post("/reset-password", { credential, password: form.password.value });
+    setBusy(form, false);
+    if (!ok) {
+      if (status === 401) return restartGoogle(data.error);
+      $("#reset-error").textContent = data.error || "Something went wrong. Please try again.";
+      return;
+    }
+    form.reset();
+    $("#reset-saved").textContent = "Password saved. Log in to the app again with the new password.";
+  });
+}
+
 document.querySelectorAll("button[type=submit]").forEach((b) => (b.dataset.label = b.textContent));
 initPasswordToggles();
 if (document.body.dataset.page === "signup") initSignup();
 if (document.body.dataset.page === "reset") initReset();
+if (document.body.dataset.page === "account") initAccount();

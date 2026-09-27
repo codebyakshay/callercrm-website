@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reset your password — CallerCRM</title>
-  <meta name="description" content="Reset the password of your CallerCRM admin account with Google.">
+  <title>Your account — CallerCRM</title>
+  <meta name="description" content="Log in to your CallerCRM company account: plan, trial, callers and password.">
   <meta name="robots" content="noindex">
-  <link rel="canonical" href="https://callercrm.codebyakshay.com/reset-password/">
+  <link rel="canonical" href="https://callercrm.codebyakshay.com/account/">
   <meta name="theme-color" content="#8c56d4">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
   <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
@@ -25,7 +25,7 @@
   <script src="/assets/js/auth.js" defer></script>
   <script src="https://accounts.google.com/gsi/client" async></script>
 </head>
-<body data-page="reset">
+<body data-page="account">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header">
@@ -43,7 +43,7 @@
           <li><a href="/#security">Security</a></li>
           <li><a href="/#pricing">Pricing</a></li>
           <li><a href="/#faq">FAQ</a></li>
-          <li><a href="/account/">Log in</a></li>
+          <li><a href="/account/" aria-current="page">Log in</a></li>
         </ul>
         <a class="btn btn-primary btn-sm" href="/signup/">Start free trial</a>
       </div>
@@ -54,53 +54,53 @@
     <section class="auth">
       <div class="container auth-grid">
         <div class="auth-pitch">
-          <span class="eyebrow">Account</span>
-          <h1>Reset your password</h1>
-          <p>For company admins who signed up on this website. Continue with the same Google account, then choose a new password.</p>
+          <span class="eyebrow">For company admins</span>
+          <h1>Your CallerCRM account</h1>
+          <p>See your plan and trial, how many callers you use, and change your admin password. You and your callers do the calling in the app.</p>
         </div>
 
         <div class="auth-card">
           <div class="auth-step" data-step="google">
-            <h2>Confirm it's you</h2>
+            <h2>Log in</h2>
             <p class="lead">Continue with the Google account you signed up with.</p>
             <div class="google-slot" id="google-button"></div>
             <p class="auth-error" id="google-error" role="alert"></p>
-            <p class="auth-note">Callers: ask your company's admin to reset your password from the app.</p>
+            <p class="auth-note">New to CallerCRM? <a href="/signup/">Start a free trial</a><br>Callers: log in in the app with the username your admin gave you.</p>
           </div>
 
-          <div class="auth-step" data-step="password" hidden>
-            <h2>Choose a new password</h2>
-            <p class="lead">You'll be logged out of the app on every phone, then log in again with the new password.</p>
-            <div class="who"><span>Signed in as <b id="who-email"></b></span><button type="button" id="change-google">Use another account</button></div>
-            <form id="reset-form" novalidate>
+          <div class="auth-step" data-step="none" hidden>
+            <h2>No company for this Google account</h2>
+            <p class="lead"><b id="none-email"></b> isn't the admin of any CallerCRM company. Try another Google account, or start a free trial.</p>
+            <a class="btn btn-primary" href="/signup/">Start free trial</a>
+            <p class="auth-note" style="margin-top:1rem"><button type="button" class="link-btn" data-signout>Use another Google account</button></p>
+          </div>
+
+          <div class="auth-step" data-step="account" hidden>
+            <span class="eyebrow" id="acc-plan"></span>
+            <h2 id="acc-company"></h2>
+            <p class="acc-status" id="acc-status"></p>
+            <dl class="acc-rows">
+              <dt>Callers</dt><dd id="acc-callers"></dd>
+              <dt>App login</dt><dd><b id="acc-email"></b> or <b id="acc-username"></b></dd>
+            </dl>
+            <div class="acc-actions">
+              <a class="btn btn-primary" id="acc-pay" href="https://wa.me/917898131225" target="_blank" rel="noopener">Pay on WhatsApp</a>
+              <button class="btn btn-ghost" type="button" id="acc-password-toggle">Change password</button>
+            </div>
+            <form id="reset-form" novalidate hidden>
               <div class="field">
-                <label for="password">New password</label>
+                <label for="password">New app password</label>
                 <div class="pw">
                   <input id="password" name="password" type="password" required minlength="8" autocomplete="new-password">
                   <button type="button" aria-pressed="false" aria-label="Show password">Show</button>
                 </div>
-                <span class="hint">At least 8 characters.</span>
+                <span class="hint">At least 8 characters. You'll be logged out of the app on every phone.</span>
               </div>
               <button class="btn btn-primary" type="submit">Save new password</button>
               <p class="auth-error" id="reset-error" role="alert"></p>
+              <p class="acc-saved" id="reset-saved" role="status"></p>
             </form>
-          </div>
-
-          <div class="auth-step" data-step="none" hidden>
-            <h2>No account for this Google account</h2>
-            <p class="lead"><b id="none-email"></b> isn't the admin of any CallerCRM company. Try another Google account, or start a free trial.</p>
-            <a class="btn btn-primary" href="/signup/">Start free trial</a>
-          </div>
-
-          <div class="auth-step" data-step="done" hidden>
-            <div class="done-mark" aria-hidden="true">✓</div>
-            <h2>Password saved</h2>
-            <p class="lead">Open the app and log in with:</p>
-            <div class="login-box">
-              <span>Email: <b id="done-email"></b></span>
-              <span>or username: <b id="done-username"></b></span>
-              <span>and your new password.</span>
-            </div>
+            <p class="auth-note acc-foot">Signed in as <span id="who-email"></span> · <button type="button" class="link-btn" data-signout>Log out</button></p>
           </div>
         </div>
       </div>
