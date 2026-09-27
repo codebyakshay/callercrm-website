@@ -92,6 +92,8 @@ function initSignup() {
     if (data.exists) {
       $("#exists-login").textContent = data.email;
       $("#exists-username").textContent = data.username;
+      const planParam = new URLSearchParams(location.search).get("plan");
+      if (PLANS[planParam]) $("#exists-account").href = `/account/?plan=${planParam}`;
       return show("exists");
     }
     $("#who-email").textContent = data.email;
@@ -323,6 +325,8 @@ function initAccount() {
     const { ok, status, data } = await post("/account", { credential: token });
     if (status === 404) {
       $("#none-email").textContent = data.email || "This Google account";
+      const wanted = new URLSearchParams(location.search).get("plan");
+      if (wanted === "starter" || wanted === "pro") $("#none-signup").href = `/signup/?plan=${wanted}`;
       return show("none");
     }
     if (!ok) return restartGoogle(data.error || "Google sign-in didn't work. Please try again.");
@@ -348,6 +352,10 @@ function initAccount() {
     $("#who-email").textContent = data.email;
     renderBilling(data);
     show("account");
+    // Came from "Choose Starter/Pro": take them straight to the plan picker.
+    if (new URLSearchParams(location.search).has("plan") && !$("#bill-pick").hidden) {
+      setTimeout(() => $("#bill-pick").scrollIntoView({ behavior: "smooth", block: "center" }), 300);
+    }
   }, true);
 
   $("#acc-password-toggle").addEventListener("click", () => {
