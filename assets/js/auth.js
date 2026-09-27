@@ -219,13 +219,15 @@ function initReset() {
 // Same prices as the pricing section and the server (src/lib/pricing.ts). The server sets the real amount.
 const PRICES = { STARTER: { name: "Starter", base: 249, seats: 10, pack: 69 }, PRO: { name: "Pro", base: 499, seats: 12, pack: 85 } };
 const rupees = (n) => `₹${n.toLocaleString("en-IN")}`;
-const bill = { plan: "PRO", interval: "MONTH", packs: 0, paidUntil: null };
+const bill = { plan: "PRO", interval: "MONTH", packs: 0, paidUntil: null, discount: 0 };
 const dayKey = (d) => d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 const addDaysKey = (key, n) => dayKey(new Date(Date.parse(`${key}T12:00:00+05:30`) + n * 864e5));
 
-function priceOf(plan, interval, packs) {
+// Same rounding as the server: founding discount off the full price, to the nearest rupee.
+function priceOf(plan, interval, packs, discount = bill.discount) {
   const monthly = PRICES[plan].base + packs * PRICES[plan].pack;
-  return interval === "YEAR" ? monthly * 10 : monthly;
+  const full = interval === "YEAR" ? monthly * 10 : monthly;
+  return Math.round((full * (100 - discount)) / 100);
 }
 
 function drawPicker() {
@@ -237,13 +239,15 @@ function drawPicker() {
     b.setAttribute("aria-pressed", String(on));
   });
   const p = PRICES[bill.plan];
-  const packPrice = bill.interval === "YEAR" ? p.pack * 10 : p.pack;
+  const packPrice = Math.round(((bill.interval === "YEAR" ? p.pack * 10 : p.pack) * (100 - bill.discount)) / 100);
   $("#bill-pack-price").textContent = `Packs of 5, ${rupees(packPrice)}${per} each`;
   $("#bill-extra").textContent = `+${bill.packs * 5}`;
   $("#bill-minus").disabled = bill.packs === 0;
   $("#bill-plus").disabled = bill.packs === 20;
   $("#bill-callers").textContent = `${p.seats + bill.packs * 5} callers`;
   $("#bill-total").textContent = rupees(priceOf(bill.plan, bill.interval, bill.packs)) + per;
+  $("#bill-discount").hidden = !bill.discount;
+  $("#bill-discount").textContent = `Founding customer price: ${bill.discount}% off, for as long as you stay.`;
   // Mirrors the server: the day after the trial / paid period, at least 2 days out (UPI pre-debit notice).
   const earliest = addDaysKey(dayKey(new Date()), 2);
   const after = bill.paidUntil ? addDaysKey(bill.paidUntil, 1) : earliest;
@@ -305,6 +309,7 @@ function initPicker() {
 
 function renderBilling(data) {
   bill.paidUntil = data.paidUntil;
+  bill.discount = data.discountPct || 0;
   const sub = data.subscription;
   $("#bill-active").hidden = !sub;
   $("#bill-pick").hidden = Boolean(sub) || data.suspended;
