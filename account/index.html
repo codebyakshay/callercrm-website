@@ -24,6 +24,7 @@
   <script src="/assets/js/main.js" defer></script>
   <script src="/assets/js/auth.js" defer></script>
   <script src="https://accounts.google.com/gsi/client" async></script>
+  <script src="https://sdk.cashfree.com/js/v3/cashfree.js" defer></script>
 </head>
 <body data-page="account">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -83,8 +84,54 @@
               <dt>Callers</dt><dd id="acc-callers"></dd>
               <dt>App login</dt><dd><b id="acc-email"></b> or <b id="acc-username"></b></dd>
             </dl>
+            <p class="acc-return" id="acc-return" role="status" hidden></p>
+
+            <!-- Automatic payments on -->
+            <section class="billing" id="bill-active" hidden>
+              <h3>Automatic payments</h3>
+              <p class="bill-line"><b id="bill-active-plan"></b> · <span id="bill-active-price"></span></p>
+              <p class="bill-line muted">Next charge: <b id="bill-next"></b>. Cashfree takes it from your UPI or card by itself.</p>
+              <button class="link-btn" type="button" id="bill-cancel">Cancel automatic payments</button>
+              <p class="bill-hint">To change plan, cancel first, then choose the new plan. Your current plan runs until its end date.</p>
+              <p class="auth-error" id="bill-cancel-error" role="alert"></p>
+            </section>
+
+            <!-- Choose a plan -->
+            <section class="billing" id="bill-pick" hidden>
+              <h3 id="bill-pick-title">Choose your plan</h3>
+              <div class="seg" role="group" aria-label="Billing period">
+                <button type="button" class="is-on" data-interval="MONTH" aria-pressed="true">Monthly</button>
+                <button type="button" data-interval="YEAR" aria-pressed="false">Yearly <span class="save">2 months free</span></button>
+              </div>
+              <div class="plan-opts" role="radiogroup" aria-label="Plan">
+                <label class="plan-opt"><input type="radio" name="bill-plan" value="STARTER"><span><b>Starter</b><small>10 callers · calling and Google Sheets</small></span><em data-price="STARTER"></em></label>
+                <label class="plan-opt"><input type="radio" name="bill-plan" value="PRO" checked><span><b>Pro</b><small>12 callers · plus WhatsApp on your number</small></span><em data-price="PRO"></em></label>
+              </div>
+              <div class="packs">
+                <span><b>Extra callers</b><small id="bill-pack-price"></small></span>
+                <div class="stepper">
+                  <button type="button" id="bill-minus" aria-label="Fewer extra callers">−</button>
+                  <output id="bill-extra" aria-live="polite">0</output>
+                  <button type="button" id="bill-plus" aria-label="More extra callers">+</button>
+                </div>
+              </div>
+              <div class="bill-total">
+                <span>Total <small id="bill-callers"></small></span>
+                <b id="bill-total"></b>
+              </div>
+              <p class="bill-hint" id="bill-first"></p>
+              <button class="btn btn-primary" type="button" id="bill-go">Continue to payment</button>
+              <a class="btn btn-primary" id="bill-wa" href="https://wa.me/917898131225" target="_blank" rel="noopener" hidden>Pay on WhatsApp</a>
+              <p class="auth-error" id="bill-error" role="alert"></p>
+              <p class="bill-hint">Secure payment by Cashfree: UPI Autopay or card. Cancel any time here.</p>
+            </section>
+
+            <section class="billing" id="bill-history" hidden>
+              <h3>Payments</h3>
+              <ul class="bill-list" id="bill-list"></ul>
+            </section>
+
             <div class="acc-actions">
-              <a class="btn btn-primary" id="acc-pay" href="https://wa.me/917898131225" target="_blank" rel="noopener">Pay on WhatsApp</a>
               <button class="btn btn-ghost" type="button" id="acc-password-toggle">Change password</button>
             </div>
             <form id="reset-form" novalidate hidden>

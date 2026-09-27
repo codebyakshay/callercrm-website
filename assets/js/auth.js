@@ -13,10 +13,12 @@ function show(step) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-async function post(path, body) {
+const BILLING_API = "https://api.callercrm.codebyakshay.com/api/billing";
+
+async function post(path, body, url = API + path) {
   let res;
   try {
-    res = await fetch(API + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   } catch {
     return { ok: false, data: { error: "Couldn't reach CallerCRM. Check your internet and try again." } };
   }
@@ -129,6 +131,8 @@ function initSignup() {
     $("#done-ends").textContent = ends.toLocaleDateString("en-IN", { day: "numeric", month: "long", timeZone: "Asia/Kolkata" });
     const wa = `Hi, I just signed up for CallerCRM (${f.get("companyName")}). I'd like to connect our WhatsApp Business number.`;
     $("#done-whatsapp").href = `https://wa.me/917898131225?text=${encodeURIComponent(wa)}`;
+    const planParam = new URLSearchParams(location.search).get("plan");
+    if (PLANS[planParam]) $("#done-pay").href = `/account/?plan=${planParam}`;
     show("done");
   });
 }
@@ -171,6 +175,140 @@ function initReset() {
   });
 }
 
+// ── Payments (account page) ─────────────────────────────────────────────
+// Same prices as the pricing section and the server (src/lib/pricing.ts). The server sets the real amount.
+const PRICES = { STARTER: { name: "Starter", base: 249, seats: 10, pack: 69 }, PRO: { name: "Pro", base: 499, seats: 12, pack: 85 } };
+const rupees = (n) => `₹${n.toLocaleString("en-IN")}`;
+const bill = { plan: "PRO", interval: "MONTH", packs: 0, paidUntil: null };
+const dayKey = (d) => d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+const addDaysKey = (key, n) => dayKey(new Date(Date.parse(`${key}T12:00:00+05:30`) + n * 864e5));
+
+function priceOf(plan, interval, packs) {
+  const monthly = PRICES[plan].base + packs * PRICES[plan].pack;
+  return interval === "YEAR" ? monthly * 10 : monthly;
+}
+
+function drawPicker() {
+  const per = bill.interval === "YEAR" ? "/year" : "/month";
+  document.querySelectorAll("[data-price]").forEach((el) => (el.textContent = rupees(priceOf(el.dataset.price, bill.interval, 0)) + per));
+  document.querySelectorAll("[data-interval]").forEach((b) => {
+    const on = b.dataset.interval === bill.interval;
+    b.classList.toggle("is-on", on);
+    b.setAttribute("aria-pressed", String(on));
+  });
+  const p = PRICES[bill.plan];
+  const packPrice = bill.interval === "YEAR" ? p.pack * 10 : p.pack;
+  $("#bill-pack-price").textContent = `Packs of 5, ${rupees(packPrice)}${per} each`;
+  $("#bill-extra").textContent = `+${bill.packs * 5}`;
+  $("#bill-minus").disabled = bill.packs === 0;
+  $("#bill-plus").disabled = bill.packs === 20;
+  $("#bill-callers").textContent = `${p.seats + bill.packs * 5} callers`;
+  $("#bill-total").textContent = rupees(priceOf(bill.plan, bill.interval, bill.packs)) + per;
+  // Mirrors the server: the day after the trial / paid period, at least 2 days out (UPI pre-debit notice).
+  const earliest = addDaysKey(dayKey(new Date()), 2);
+  const after = bill.paidUntil ? addDaysKey(bill.paidUntil, 1) : earliest;
+  const first = after > earliest ? after : earliest;
+  $("#bill-first").textContent = `Nothing is charged today (₹1 is checked and refunded). First charge on ${niceDay(first)}, then every ${bill.interval === "YEAR" ? "year" : "month"}.`;
+}
+
+function initPicker() {
+  document.querySelectorAll("[data-interval]").forEach((b) =>
+    b.addEventListener("click", () => { bill.interval = b.dataset.interval; drawPicker(); }));
+  document.querySelectorAll('input[name="bill-plan"]').forEach((r) =>
+    r.addEventListener("change", () => { bill.plan = r.value; drawPicker(); }));
+  $("#bill-minus").addEventListener("click", () => { bill.packs = Math.max(0, bill.packs - 1); drawPicker(); });
+  $("#bill-plus").addEventListener("click", () => { bill.packs = Math.min(20, bill.packs + 1); drawPicker(); });
+
+  $("#bill-go").addEventListener("click", async () => {
+    const btn = $("#bill-go");
+    $("#bill-error").textContent = "";
+    btn.disabled = true;
+    btn.textContent = "Opening secure payment…";
+    const { ok, status, data } = await post("", { credential, plan: bill.plan, interval: bill.interval, extraPacks: bill.packs }, BILLING_API + "/subscribe");
+    const reset = () => { btn.disabled = false; btn.textContent = "Continue to payment"; };
+    if (!ok) {
+      reset();
+      if (status === 401) return restartGoogle(data.error);
+      $("#bill-error").textContent = data.error || "Couldn't start the payment. Please try again.";
+      return;
+    }
+    if (!window.Cashfree) {
+      reset();
+      $("#bill-error").textContent = "The payment page didn't load. Check your internet, reload, and try again.";
+      return;
+    }
+    const result = await window.Cashfree({ mode: data.mode }).subscriptionsCheckout({ subsSessionId: data.sessionId, redirectTarget: "_self" });
+    if (result?.error) {
+      reset();
+      $("#bill-error").textContent = result.error.message || "The payment page didn't open. Please try again.";
+    }
+  });
+
+  $("#bill-cancel").addEventListener("click", async () => {
+    if (!confirm("Stop automatic payments? Your plan keeps working until its end date, then the account turns read-only unless you pay again.")) return;
+    $("#bill-cancel-error").textContent = "";
+    const { ok, status, data } = await post("", { credential }, BILLING_API + "/cancel");
+    if (!ok) {
+      if (status === 401) return restartGoogle(data.error);
+      $("#bill-cancel-error").textContent = data.error || "Couldn't cancel. Please try again.";
+      return;
+    }
+    location.reload();
+  });
+
+  const wanted = new URLSearchParams(location.search).get("plan");
+  if (wanted === "starter" || wanted === "pro") {
+    bill.plan = wanted.toUpperCase();
+    document.querySelector(`input[name="bill-plan"][value="${bill.plan}"]`).checked = true;
+  }
+}
+
+function renderBilling(data) {
+  bill.paidUntil = data.paidUntil;
+  const sub = data.subscription;
+  $("#bill-active").hidden = !sub;
+  $("#bill-pick").hidden = Boolean(sub) || data.suspended;
+  if (sub) {
+    const extra = sub.extraPacks ? ` + ${sub.extraPacks * 5} callers` : "";
+    $("#bill-active-plan").textContent = `${PRICES[sub.plan]?.name ?? sub.plan}${extra}`;
+    $("#bill-active-price").textContent = rupees(sub.amount) + (sub.interval === "YEAR" ? "/year" : "/month");
+    const next = data.payments.length ? addDaysKey(data.paidUntil, 1) : sub.firstChargeDay;
+    $("#bill-next").textContent = niceDay(next);
+  } else {
+    $("#bill-pick-title").textContent = data.plan === "TRIAL" ? "Choose your plan" : "Pay for your plan";
+    drawPicker();
+    // Online payments not switched on for this company yet: same picker, paid on WhatsApp.
+    $("#bill-go").hidden = !data.paymentsOpen;
+    $("#bill-wa").hidden = data.paymentsOpen;
+    if (!data.paymentsOpen) {
+      const updateWa = () => {
+        const per = bill.interval === "YEAR" ? "yearly" : "monthly";
+        const msg = `Hi, I'd like to pay for CallerCRM.\nCompany: ${data.company}\nLogin: ${data.email}\nPlan: ${PRICES[bill.plan].name} ${per}, ${PRICES[bill.plan].seats + bill.packs * 5} callers (${$("#bill-total").textContent})`;
+        $("#bill-wa").href = `https://wa.me/917898131225?text=${encodeURIComponent(msg)}`;
+      };
+      updateWa();
+      $("#bill-pick").addEventListener("click", () => setTimeout(updateWa));
+    }
+  }
+  $("#bill-history").hidden = !data.payments.length;
+  $("#bill-list").replaceChildren(
+    ...data.payments.map((p) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span>${niceDay(p.paidOn)}</span><span><b>${rupees(p.amount)}</b> · covers to ${niceDay(p.coversUntil)}</span>`;
+      return li;
+    }),
+  );
+  if (new URLSearchParams(location.search).has("subscription") && !sub) {
+    const note = $("#acc-return");
+    note.textContent = "Thanks! If you approved the payment, it can take a minute to show here. Reload the page in a minute.";
+    note.hidden = false;
+  } else if (new URLSearchParams(location.search).has("subscription")) {
+    const note = $("#acc-return");
+    note.textContent = "Automatic payments are on. You're all set.";
+    note.hidden = false;
+  }
+}
+
 // ── Account ─────────────────────────────────────────────────────────────
 const PLAN_LABEL = { TRIAL: "Free trial · every Pro feature", STARTER: "Starter plan", PRO: "Pro plan" };
 const niceDay = (key) =>
@@ -178,6 +316,7 @@ const niceDay = (key) =>
 
 function initAccount() {
   const form = $("#reset-form");
+  initPicker();
 
   initGoogle(async (token) => {
     $("#google-error").textContent = "";
@@ -207,8 +346,7 @@ function initAccount() {
     $("#acc-email").textContent = data.email;
     $("#acc-username").textContent = data.username;
     $("#who-email").textContent = data.email;
-    const msg = `Hi, I'd like to pay for CallerCRM.\nCompany: ${data.company}\nLogin: ${data.email}\nPlan (Starter / Pro, monthly / yearly): `;
-    $("#acc-pay").href = `https://wa.me/917898131225?text=${encodeURIComponent(msg)}`;
+    renderBilling(data);
     show("account");
   }, true);
 
