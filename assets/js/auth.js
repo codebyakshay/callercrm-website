@@ -44,7 +44,19 @@ function savedCredential() {
   return null;
 }
 function forgetCredential() {
-  try { sessionStorage.removeItem(STORE_KEY); } catch { /* nothing stored */ }
+  try { sessionStorage.removeItem(STORE_KEY); sessionStorage.removeItem(WEB_KEY); } catch { /* nothing stored */ }
+}
+// Password login on the account page returns our own website token (12 hours); kept like the Google one.
+const WEB_KEY = "callercrm.web";
+function savedWebToken() {
+  try {
+    const token = sessionStorage.getItem(WEB_KEY);
+    if (!token) return null;
+    const { exp } = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    if (exp * 1000 > Date.now() + 60000) return token;
+    sessionStorage.removeItem(WEB_KEY);
+  } catch { /* unreadable: log in again */ }
+  return null;
 }
 const planQuery = () => {
   const plan = new URLSearchParams(location.search).get("plan");
@@ -268,11 +280,14 @@ function initPicker() {
     $("#bill-error").textContent = "";
     btn.disabled = true;
     btn.textContent = "Opening secure payment…";
-    const { ok, status, data } = await post("", { credential, plan: bill.plan, interval: bill.interval, extraPacks: bill.packs }, BILLING_API + "/subscribe");
+    const { ok, status, data } = await post("", {
+      ...accountAuth, plan: bill.plan, interval: bill.interval, extraPacks: bill.packs,
+      email: $("#bill-email").value, phone: $("#bill-phone").value,
+    }, BILLING_API + "/subscribe");
     const reset = () => { btn.disabled = false; btn.textContent = "Continue to payment"; };
     if (!ok) {
       reset();
-      if (status === 401) return restartGoogle(data.error);
+      if (status === 401) return showLogin(data.error);
       $("#bill-error").textContent = data.error || "Couldn't start the payment. Please try again.";
       return;
     }
@@ -291,9 +306,9 @@ function initPicker() {
   $("#bill-cancel").addEventListener("click", async () => {
     if (!confirm("Stop automatic payments? Your plan keeps working until its end date, then the account turns read-only unless you pay again.")) return;
     $("#bill-cancel-error").textContent = "";
-    const { ok, status, data } = await post("", { credential }, BILLING_API + "/cancel");
+    const { ok, status, data } = await post("", { ...accountAuth }, BILLING_API + "/cancel");
     if (!ok) {
-      if (status === 401) return restartGoogle(data.error);
+      if (status === 401) return showLogin(data.error);
       $("#bill-cancel-error").textContent = data.error || "Couldn't cancel. Please try again.";
       return;
     }
@@ -325,6 +340,10 @@ function renderBilling(data) {
     // Online payments not switched on for this company yet: same picker, paid on WhatsApp.
     $("#bill-go").hidden = !data.paymentsOpen;
     $("#bill-wa").hidden = data.paymentsOpen;
+    // Cashfree needs an email and a mobile; admins made in the panel may have neither on file.
+    $("#bill-contact").hidden = !data.paymentsOpen || !(data.needEmail || data.needPhone);
+    $("#bill-email-field").hidden = !data.needEmail;
+    $("#bill-phone-field").hidden = !data.needPhone;
     if (!data.paymentsOpen) {
       const updateWa = () => {
         const per = bill.interval === "YEAR" ? "yearly" : "monthly";
@@ -359,46 +378,88 @@ const PLAN_LABEL = { TRIAL: "Free trial · every Pro feature", STARTER: "Starter
 const niceDay = (key) =>
   new Date(`${key}T12:00:00+05:30`).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" });
 
+let accountAuth = null; // { credential } (Google) or { token } (password login)
+
+function showLogin(message = "") {
+  accountAuth = null;
+  forgetCredential();
+  $("#google-error").textContent = message;
+  show("google");
+}
+
+async function loadAccount(authBody) {
+  $("#google-error").textContent = "";
+  const { ok, status, data } = await post("/account", authBody);
+  if (status === 404) {
+    // Google account without a company yet: create it (same Google sign-in, no second prompt).
+    location.replace(`/signup/${planQuery()}`);
+    return;
+  }
+  if (!ok) return showLogin(data.error || "Couldn't log you in. Please try again.");
+  accountAuth = authBody;
+  $("#acc-plan").textContent = PLAN_LABEL[data.plan] || data.plan;
+  $("#acc-company").textContent = data.company;
+  const st = $("#acc-status");
+  st.className = "acc-status";
+  if (data.suspended) {
+    st.classList.add("bad");
+    st.textContent = "This account is suspended. Message us on WhatsApp.";
+  } else if (data.notice) {
+    st.classList.add(data.notice.tone === "bad" ? "bad" : "warn");
+    st.textContent = `${data.notice.title}. ${data.notice.text}`;
+  } else if (data.paidUntil) {
+    st.textContent = data.plan === "TRIAL" ? `Trial runs until ${niceDay(data.paidUntil)}.` : `Paid until ${niceDay(data.paidUntil)}.`;
+  } else {
+    st.textContent = "Active.";
+  }
+  $("#acc-callers").textContent = data.seatLimit ? `${data.callers} of ${data.seatLimit} in use` : `${data.callers} in use`;
+  $("#acc-login").textContent = data.email ? `${data.email} or ${data.username}` : data.username;
+  const row = (id, value) => {
+    $(`#${id}`).textContent = value ?? "";
+    const wrap = $(`#${id}-row`);
+    if (wrap) wrap.hidden = !value;
+  };
+  const p = data.profile || {};
+  row("acc-phone", p.phone ? `+91 ${p.phone}` : null);
+  row("acc-city", p.city);
+  row("acc-team", p.teamSize ? `${p.teamSize} callers` : null);
+  row("acc-gst", p.gstNumber);
+  row("acc-since", p.since ? niceDay(p.since) : null);
+  $("#who-email").textContent = data.email || data.username;
+  renderBilling(data);
+  show("account");
+  // Came from "Choose Starter/Pro": take them straight to the plan picker.
+  if (new URLSearchParams(location.search).has("plan") && !$("#bill-pick").hidden) {
+    setTimeout(() => $("#bill-pick").scrollIntoView({ behavior: "smooth", block: "center" }), 300);
+  }
+}
+
 function initAccount() {
   const form = $("#reset-form");
   initPicker();
 
-  initGoogle(async (token) => {
-    $("#google-error").textContent = "";
-    const { ok, status, data } = await post("/account", { credential: token });
-    if (status === 404) {
-      // No company for this Google account yet: create it (same Google sign-in, no second prompt).
-      location.replace(`/signup/${planQuery()}`);
+  // Password login from earlier in this tab wins; otherwise Google (remembered or one tap).
+  const web = savedWebToken();
+  if (web) loadAccount({ token: web });
+  else initGoogle((token) => loadAccount({ credential: token }), true);
+  if (web) initGoogle((token) => loadAccount({ credential: token }));
+
+  const login = $("#pw-login");
+  login.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    $("#login-error").textContent = "";
+    if (!login.reportValidity()) return;
+    setBusy(login, true, "Logging in…");
+    const { ok, data } = await post("/login", { username: login.username.value, password: login.password.value });
+    setBusy(login, false);
+    if (!ok) {
+      $("#login-error").textContent = data.error || "Couldn't log you in. Please try again.";
       return;
     }
-    if (!ok) return restartGoogle(data.error || "Google sign-in didn't work. Please try again.");
-    credential = token;
-    $("#acc-plan").textContent = PLAN_LABEL[data.plan] || data.plan;
-    $("#acc-company").textContent = data.company;
-    const st = $("#acc-status");
-    st.className = "acc-status";
-    if (data.suspended) {
-      st.classList.add("bad");
-      st.textContent = "This account is suspended. Message us on WhatsApp.";
-    } else if (data.notice) {
-      st.classList.add(data.notice.tone === "bad" ? "bad" : "warn");
-      st.textContent = `${data.notice.title}. ${data.notice.text}`;
-    } else if (data.paidUntil) {
-      st.textContent = data.plan === "TRIAL" ? `Trial runs until ${niceDay(data.paidUntil)}.` : `Paid until ${niceDay(data.paidUntil)}.`;
-    } else {
-      st.textContent = "Active.";
-    }
-    $("#acc-callers").textContent = data.seatLimit ? `${data.callers} of ${data.seatLimit} in use` : `${data.callers} in use`;
-    $("#acc-email").textContent = data.email;
-    $("#acc-username").textContent = data.username;
-    $("#who-email").textContent = data.email;
-    renderBilling(data);
-    show("account");
-    // Came from "Choose Starter/Pro": take them straight to the plan picker.
-    if (new URLSearchParams(location.search).has("plan") && !$("#bill-pick").hidden) {
-      setTimeout(() => $("#bill-pick").scrollIntoView({ behavior: "smooth", block: "center" }), 300);
-    }
-  }, true);
+    try { sessionStorage.setItem(WEB_KEY, data.token); } catch { /* private mode: this page only */ }
+    login.reset();
+    loadAccount({ token: data.token });
+  });
 
   $("#acc-password-toggle").addEventListener("click", () => {
     form.hidden = !form.hidden;
@@ -407,7 +468,7 @@ function initAccount() {
   document.querySelectorAll("[data-signout]").forEach((b) =>
     b.addEventListener("click", () => {
       window.google?.accounts?.id?.disableAutoSelect();
-      restartGoogle("");
+      showLogin("");
     }),
   );
 
@@ -417,10 +478,10 @@ function initAccount() {
     $("#reset-saved").textContent = "";
     if (!form.reportValidity()) return;
     setBusy(form, true, "Saving…");
-    const { ok, status, data } = await post("/reset-password", { credential, password: form.password.value });
+    const { ok, status, data } = await post("/reset-password", { ...accountAuth, password: form.password.value });
     setBusy(form, false);
     if (!ok) {
-      if (status === 401) return restartGoogle(data.error);
+      if (status === 401) return showLogin(data.error);
       $("#reset-error").textContent = data.error || "Something went wrong. Please try again.";
       return;
     }

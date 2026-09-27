@@ -166,3 +166,9 @@
 .field-error { font-size: var(--fs-xs); color: #9b2335; font-weight: 600; }
 .field-error:empty { display: none; }
 .bill-discount { margin-top: 0.6rem; font-size: var(--fs-xs); font-weight: 700; color: #13895b; }
+.or { display: flex; align-items: center; gap: 0.8rem; margin: 1.2rem 0; color: var(--muted); font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+#pw-login { display: grid; gap: 0.9rem; }
+#pw-login .btn { width: 100%; }
+.acc-rows > div { display: contents; }
+.bill-contact { margin-top: 1rem; }

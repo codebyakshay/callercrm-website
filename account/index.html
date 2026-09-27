@@ -57,16 +57,32 @@
         <div class="auth-pitch">
           <span class="eyebrow">For company admins</span>
           <h1>Your CallerCRM account</h1>
-          <p>See your plan and trial, how many callers you use, and change your admin password. You and your callers do the calling in the app.</p>
+          <p>Your company dashboard: profile, plan, callers, billing and payments, cancelling, and your admin password. The calling itself happens in the app.</p>
         </div>
 
         <div class="auth-card">
           <div class="auth-step" data-step="google">
             <h2>Log in</h2>
-            <p class="lead">Continue with the Google account you signed up with.</p>
+            <p class="lead">For company admins. Continue with Google, or use the same login as the app.</p>
             <div class="google-slot" id="google-button"></div>
             <p class="auth-error" id="google-error" role="alert"></p>
-            <p class="auth-note">New to CallerCRM? <a href="/signup/">Start a free trial</a><br>Callers: log in in the app with the username your admin gave you.</p>
+            <div class="or"><span>or</span></div>
+            <form id="pw-login" novalidate>
+              <div class="field">
+                <label for="login-user">Email or username</label>
+                <input id="login-user" name="username" required autocomplete="username" autocapitalize="none" spellcheck="false">
+              </div>
+              <div class="field">
+                <label for="login-pass">Password</label>
+                <div class="pw">
+                  <input id="login-pass" name="password" type="password" required autocomplete="current-password">
+                  <button type="button" aria-pressed="false" aria-label="Show password">Show</button>
+                </div>
+              </div>
+              <button class="btn btn-primary" type="submit">Log in</button>
+              <p class="auth-error" id="login-error" role="alert"></p>
+            </form>
+            <p class="auth-note" style="margin-top:1.2rem">New to CallerCRM? <a href="/signup/">Start a free trial</a> · <a href="/reset-password/">Forgot password?</a><br>Callers: use the CallerCRM app with the login your admin gave you.</p>
           </div>
 
                     <div class="auth-step" data-step="account" hidden>
@@ -74,8 +90,13 @@
             <h2 id="acc-company"></h2>
             <p class="acc-status" id="acc-status"></p>
             <dl class="acc-rows">
-              <dt>Callers</dt><dd id="acc-callers"></dd>
-              <dt>App login</dt><dd><b id="acc-email"></b> or <b id="acc-username"></b></dd>
+              <div><dt>Callers</dt><dd id="acc-callers"></dd></div>
+              <div><dt>App login</dt><dd><span id="acc-login"></span></dd></div>
+              <div id="acc-phone-row"><dt>Phone</dt><dd id="acc-phone"></dd></div>
+              <div id="acc-city-row"><dt>City</dt><dd id="acc-city"></dd></div>
+              <div id="acc-team-row"><dt>Team size</dt><dd id="acc-team"></dd></div>
+              <div id="acc-gst-row"><dt>GST number</dt><dd id="acc-gst"></dd></div>
+              <div><dt>Customer since</dt><dd id="acc-since"></dd></div>
             </dl>
             <p class="acc-return" id="acc-return" role="status" hidden></p>
 
@@ -114,6 +135,16 @@
               </div>
               <p class="bill-discount" id="bill-discount" hidden></p>
               <p class="bill-hint" id="bill-first"></p>
+              <div class="fields bill-contact" id="bill-contact" hidden>
+                <div class="field" id="bill-email-field">
+                  <label for="bill-email">Email for payment receipts</label>
+                  <input id="bill-email" type="email" autocomplete="email" autocapitalize="none">
+                </div>
+                <div class="field" id="bill-phone-field">
+                  <label for="bill-phone">Mobile for UPI Autopay</label>
+                  <input id="bill-phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="98765 43210">
+                </div>
+              </div>
               <button class="btn btn-primary" type="button" id="bill-go">Continue to payment</button>
               <a class="btn btn-primary" id="bill-wa" href="https://wa.me/917898131225" target="_blank" rel="noopener" hidden>Pay on WhatsApp</a>
               <p class="auth-error" id="bill-error" role="alert"></p>
