@@ -163,3 +163,5 @@
 .acc-actions { grid-template-columns: minmax(0, 1fr); }
 #bill-wa { width: 100%; margin-top: 1rem; }
 .auth [hidden] { display: none !important; }
+.field-error { font-size: var(--fs-xs); color: #9b2335; font-weight: 600; }
+.field-error:empty { display: none; }

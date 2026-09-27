@@ -129,6 +129,19 @@ function initSignup() {
 
   $("#change-google").addEventListener("click", () => restartGoogle(""));
 
+  // One trial per mobile number: say so as soon as the number is typed, not after the whole form.
+  const phone = form.phone;
+  phone.addEventListener("input", () => { phone.setCustomValidity(""); $("#phone-error").textContent = ""; });
+  phone.addEventListener("change", async () => {
+    if (!credential || phone.value.replace(/\D/g, "").length < 10) return;
+    const { ok, data } = await post("/check", { credential, phone: phone.value });
+    if (ok && data.phoneTaken) {
+      const msg = "This number already has a CallerCRM company (one free trial per number). Use another number.";
+      phone.setCustomValidity(msg);
+      $("#phone-error").textContent = msg;
+    }
+  });
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const error = $("#signup-error");
