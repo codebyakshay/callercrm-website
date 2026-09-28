@@ -64,14 +64,21 @@ function forgetAll() {
 let step = "login";
 let google = null; // Google ID token from this visit's sign-in
 
+const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 function show(next, message = "") {
   step = next;
-  $("#gate").hidden = false;
-  $("#dash").hidden = true;
-  $$(".step").forEach((el) => (el.hidden = el.dataset.step !== next));
-  const current = $(`[data-step="${next}"]`);
-  $$("[data-error]", current).forEach((e) => (e.textContent = message));
-  window.scrollTo({ top: 0 });
+  const swap = () => {
+    $("#gate").hidden = false;
+    $("#dash").hidden = true;
+    $$(".step").forEach((el) => (el.hidden = el.dataset.step !== next));
+    $$("[data-error]", $(`[data-step="${next}"]`)).forEach((e) => (e.textContent = message));
+    window.scrollTo({ top: 0 });
+  };
+  // Moving between steps crossfades (see ::view-transition in account.css); the first screen just appears.
+  const switching = !$("#gate").hidden && $$(".step").some((el) => !el.hidden);
+  if (switching && document.startViewTransition && !calm) document.startViewTransition(swap);
+  else swap();
 }
 
 function stepError(message) {
@@ -482,6 +489,54 @@ function initDashboard() {
   });
 }
 
+// ── Side panel: a live call log ─────────────────────────────────────────
+// Every few seconds a lead lands on top as "Calling…", then gets its outcome; the oldest slides out.
+const LEADS = ["Priya Nair", "Arjun Mehta", "Sneha Reddy", "Vikram Rao", "Kavya Iyer", "Rohan Das", "Pooja Shah", "Imran Khan", "Divya Menon", "Karan Gill", "Ritu Sharma", "Aditya Jain"];
+const OUTCOMES = [["t-int", "Interested"], ["t-cb", "Callback · 5 PM"], ["t-no", "Not reachable"], ["t-int", "Sale closed"], ["t-cb", "Callback · tomorrow"], ["t-int", "Interested"]];
+const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+function startTicker() {
+  const list = $("#ticker");
+  const count = $("#live-count");
+  if (calm) return;
+  let n = 0;
+  setInterval(() => {
+    if (document.hidden || !list.offsetParent) return; // background tab, dashboard or phone layout
+    list.classList.add("rolling");
+    const name = LEADS[n % LEADS.length];
+    const [tone, outcome] = OUTCOMES[n++ % OUTCOMES.length];
+    const box = list.getBoundingClientRect();
+    const before = new Map($$("li", list).map((li) => [li, li.getBoundingClientRect()]));
+
+    const li = document.createElement("li");
+    li.className = "calling";
+    li.innerHTML = `<span class="av">${name.split(" ").map((w) => w[0]).join("")}</span><b>${name}</b><em class="t-call">Calling…</em>`;
+    list.prepend(li);
+
+    // The oldest card fades out where it stood; the rest glide to their new places.
+    const gone = list.lastElementChild;
+    const r = before.get(gone);
+    Object.assign(gone.style, { position: "absolute", margin: 0, top: `${r.top - box.top}px`, left: `${r.left - box.left}px`, width: `${r.width}px` });
+    gone.animate([{ opacity: 1 }, { opacity: 0, transform: "translateY(18px) scale(0.95)" }], { duration: 500, easing: EASE }).onfinish = () => gone.remove();
+    before.forEach((old, el) => {
+      if (el === gone) return;
+      const now = el.getBoundingClientRect();
+      el.animate([{ transform: `translate(${old.left - now.left}px, ${old.top - now.top}px)` }, { transform: "none" }], { duration: 750, easing: EASE });
+    });
+    li.animate([{ opacity: 0, transform: "translateY(-16px) scale(0.96)" }, { opacity: 1, transform: "none" }], { duration: 650, easing: EASE });
+
+    setTimeout(() => {
+      li.classList.remove("calling");
+      const chip = $("em", li);
+      chip.className = tone;
+      chip.textContent = outcome;
+      chip.animate([{ opacity: 0, transform: "scale(0.6)" }, { transform: "scale(1.08)", offset: 0.6 }, { opacity: 1, transform: "none" }], { duration: 450, easing: EASE });
+      count.textContent = Number(count.textContent) + 1;
+      count.animate([{ opacity: 0, transform: "translateY(-70%)" }, { opacity: 1, transform: "none" }], { duration: 400, easing: EASE });
+    }, 1500);
+  }, 3400);
+}
+
 // ── Start ───────────────────────────────────────────────────────────────
 function initPasswordToggles() {
   $$(".pw button").forEach((btn) =>
@@ -510,6 +565,7 @@ initReset();
 initDashboard();
 initSignupCopy();
 renderGoogleButtons();
+startTicker();
 $$("[data-go]").forEach((b) => b.addEventListener("click", () => {
   if (b.dataset.go === "reset") { $("#reset-form").hidden = true; $("[data-google]", $('[data-step="reset"]')).hidden = false; }
   show(b.dataset.go);
