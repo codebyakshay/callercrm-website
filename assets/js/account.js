@@ -276,7 +276,7 @@ function initCheckout() {
 // ── Google suggestions: company name and business address ───────────────
 // A browser key restricted to this website, with Maps JavaScript API and Places API (New) on.
 // Empty = the two fields stay plain text boxes.
-const MAPS_KEY = "AIzaSyAGga12b-R_-GWkd8e6A-h_WJ-28DUh-tk";
+const MAPS_KEY = "AIzaSyBYj1oAWdWJIUHG6aX_qZn3X_kUPFJKwRE";
 let placesLib = null;
 
 function loadPlaces() {
