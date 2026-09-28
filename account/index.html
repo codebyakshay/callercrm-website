@@ -17,9 +17,9 @@
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/base.css">
   <link rel="stylesheet" href="/assets/css/components.css">
-  <link rel="stylesheet" href="/assets/css/account.css?v=20260928d">
+  <link rel="stylesheet" href="/assets/css/account.css?v=20260929a">
 
-  <script src="/assets/js/account.js?v=20260928d" defer></script>
+  <script src="/assets/js/account.js?v=20260929a" defer></script>
   <script src="https://accounts.google.com/gsi/client" async></script>
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js" defer></script>
 </head>
@@ -291,6 +291,10 @@
             <!-- choose a plan, pay or renew -->
             <div id="b-pick" hidden>
               <h2 id="b-title">Choose your plan</h2>
+            <div class="cur-plan" id="b-current" hidden>
+              <span><small>Your plan</small><b id="b-cur-name"></b></span>
+              <button type="button" class="link-btn" id="b-edit">Change plan or callers</button>
+            </div>
               <div class="seg" role="group" aria-label="Billing period">
                 <button type="button" class="is-on" data-interval="MONTH" aria-pressed="true">Monthly</button>
                 <button type="button" data-interval="YEAR" aria-pressed="false">Yearly <span class="save">2 months free</span></button>

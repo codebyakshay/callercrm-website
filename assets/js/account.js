@@ -421,7 +421,7 @@ async function checkOrder() {
   const { data } = await post(`${BILLING_API}/confirm`, { orderId: params.get("order") });
   orderPaid = data?.paid === true;
 }
-const bill = { plan: wantedPlan || "PRO", interval: "MONTH", packs: 0, discount: 0 };
+const bill = { plan: wantedPlan || "PRO", interval: "MONTH", packs: 0, discount: 0, current: null, editing: false };
 
 async function loadAccount(authBody, { justSignedUp = false, noCompany } = {}) {
   const { ok, status, data } = await post(`${API}/account`, authBody);
@@ -640,18 +640,33 @@ function renderBilling() {
   const d = account;
   bill.discount = d.discountPct || 0;
   $("#b-pick").hidden = d.suspended;
-  // Renewing: start from what they have: plan, and enough extra callers for their limit and team
-  // (no limit set = size it to the callers they have).
+  // On a paid plan: renew what they have: the plan, and enough extra callers for their limit and team
+  // (no limit set = size it to the callers they have). The plan table only if they choose to change.
+  bill.current = null;
+  bill.editing = false;
   if (PRICES[d.plan] && !wantedPlan) {
-    bill.plan = d.plan;
     const need = Math.max(d.seatLimit || 0, d.callers || 0);
-    bill.packs = Math.max(0, Math.min(20, Math.ceil((need - PRICES[d.plan].seats) / 5)));
+    bill.current = { plan: d.plan, packs: Math.max(0, Math.min(20, Math.ceil((need - PRICES[d.plan].seats) / 5))) };
+    bill.plan = bill.current.plan;
+    bill.packs = bill.current.packs;
   }
-  $("#b-title").textContent = d.plan === "TRIAL" ? "Choose your plan" : d.awaitingPayment ? "Pay for your plan" : "Renew or change plan";
-  $(`input[name="b-plan"][value="${bill.plan}"]`).checked = true;
+  drawMode();
   $("#b-contact").hidden = !d.paymentsOpen || !(d.needEmail || d.needPhone);
   $("#b-email-field").hidden = !d.needEmail;
   $("#b-phone-field").hidden = !d.needPhone;
+  drawPicker();
+}
+
+/** Renew (their plan, one button) or choose / change (the plan table). */
+function drawMode() {
+  const d = account;
+  const renew = Boolean(bill.current) && !d.awaitingPayment;
+  $("#billing").classList.toggle("is-renew", renew && !bill.editing);
+  $("#b-current").hidden = !renew;
+  $("#b-edit").textContent = bill.editing ? "Keep my current plan" : "Change plan or callers";
+  $("#b-title").textContent =
+    d.plan === "TRIAL" ? "Choose your plan" : d.awaitingPayment ? "Pay for your plan" : bill.editing ? "Change plan or callers" : "Renew your plan";
+  $(`input[name="b-plan"][value="${bill.plan}"]`).checked = true;
   drawPicker();
 }
 
@@ -672,6 +687,10 @@ function drawPicker() {
   $("#b-minus").disabled = bill.packs === 0;
   $("#b-plus").disabled = bill.packs === 20;
   $("#b-callers").textContent = `${p.seats + bill.packs * 5} callers`;
+  if (bill.current) {
+    const c = PRICES[bill.current.plan];
+    $("#b-cur-name").textContent = `${c.name} · ${c.seats + bill.current.packs * 5} callers`;
+  }
   const total = priceOf(bill.plan, bill.interval, bill.packs);
   $("#b-total").textContent = rupees(total) + per;
   $("#b-discount").hidden = !bill.discount;
@@ -682,11 +701,14 @@ function drawPicker() {
   const nowBtn = $("#b-now");
   nowBtn.hidden = !d.paymentsOpen;
   $("#b-wa").hidden = d.paymentsOpen;
-  nowBtn.textContent = trial ? `Start ${p.name} · pay ${rupees(total)}` : d.awaitingPayment ? `Pay ${rupees(total)} and start ${p.name}` : `Pay ${rupees(total)}`;
+  const changed = Boolean(bill.current) && (bill.plan !== bill.current.plan || bill.packs !== bill.current.packs);
+  nowBtn.textContent = trial
+    ? `Start ${p.name} · pay ${rupees(total)}`
+    : d.awaitingPayment ? `Pay ${rupees(total)} and start ${p.name}` : changed ? `Pay ${rupees(total)}` : `Renew · pay ${rupees(total)}`;
   nowBtn.dataset.label = nowBtn.textContent;
 
   const notes = [`Pay once for one ${every}: your plan then runs until ${niceDay(paidUntilAfterPaying(bill.interval))}.`];
-  if (!trial && PRICES[d.plan] && (bill.plan !== d.plan || p.seats + bill.packs * 5 !== d.seatLimit)) notes.push("The new plan and callers start as soon as it's paid.");
+  if (!trial && changed) notes.push("The new plan and callers start as soon as it's paid.");
   notes.push("No automatic charges: we remind you before it ends.");
   if (d.paymentsOpen) notes.push("Secure payment by Cashfree: UPI, card or netbanking.");
   $("#b-note").textContent = notes.join(" ");
@@ -728,6 +750,11 @@ function initBilling() {
   $("#b-minus").addEventListener("click", () => { bill.packs = Math.max(0, bill.packs - 1); drawPicker(); });
   $("#b-plus").addEventListener("click", () => { bill.packs = Math.min(20, bill.packs + 1); drawPicker(); });
   $("#b-now").addEventListener("click", (e) => pay(e.currentTarget));
+  $("#b-edit").addEventListener("click", () => {
+    bill.editing = !bill.editing;
+    if (!bill.editing) { bill.plan = bill.current.plan; bill.packs = bill.current.packs; } // back to what they have
+    drawMode();
+  });
 }
 
 function renderPayments() {
