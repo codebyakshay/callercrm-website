@@ -4,8 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Your account — CallerCRM</title>
-  <meta name="description" content="Log in to your CallerCRM company account: plan, trial, callers and password.">
-  <meta name="robots" content="noindex">
+  <meta name="description" content="Log in or sign up to CallerCRM: start a free trial or a plan, and manage your company, billing and password.">
   <link rel="canonical" href="https://callercrm.codebyakshay.com/account/">
   <meta name="theme-color" content="#8c56d4">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
@@ -18,203 +17,272 @@
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/base.css">
   <link rel="stylesheet" href="/assets/css/components.css">
-  <link rel="stylesheet" href="/assets/css/auth.css">
+  <link rel="stylesheet" href="/assets/css/account.css">
 
-  <script>document.documentElement.classList.add("js");</script>
-  <script src="/assets/js/main.js" defer></script>
-  <script src="/assets/js/auth.js" defer></script>
+  <script src="/assets/js/account.js" defer></script>
   <script src="https://accounts.google.com/gsi/client" async></script>
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js" defer></script>
 </head>
-<body data-page="account">
+<body>
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <header class="site-header">
-    <nav class="container nav" aria-label="Main">
-      <a class="brand" href="/">
-        <img src="/assets/img/icon-192.png" alt="" width="36" height="36">
-        CallerCRM
-      </a>
-      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu" aria-label="Open menu"><span></span></button>
-      <div class="nav-menu" id="nav-menu">
-        <ul class="nav-links">
-          <li><a href="/#how">How it works</a></li>
-          <li><a href="/#tour">Product tour</a></li>
-          <li><a href="/#features">Features</a></li>
-          <li><a href="/#security">Security</a></li>
-          <li><a href="/#pricing">Pricing</a></li>
-          <li><a href="/#faq">FAQ</a></li>
-          <li><a href="/account/" aria-current="page">Log in</a></li>
-        </ul>
-        <a class="btn btn-primary btn-sm" href="/signup/">Start free trial</a>
-      </div>
-    </nav>
+  <header class="acct-top">
+    <a class="brand" href="/"><img src="/assets/img/icon-192.png" alt="" width="36" height="36">CallerCRM</a>
+    <a class="acct-back" href="/"><svg aria-hidden="true"><use href="/assets/img/icons.svg#arrow-left"/></svg>Back to website</a>
   </header>
 
   <main id="main">
-    <section class="auth">
-      <div class="container auth-grid">
-        <div class="auth-pitch">
-          <span class="eyebrow">For company admins</span>
-          <h1>Your CallerCRM account</h1>
-          <p>Your company dashboard: profile, plan, callers, billing and payments, cancelling, and your admin password. The calling itself happens in the app.</p>
+    <!-- ── Log in / sign up: one card, the step changes ───────────────── -->
+    <section class="gate" id="gate">
+      <aside class="gate-art" aria-hidden="true">
+        <p class="gate-kicker" id="art-kicker">For calling teams</p>
+        <h2 class="gate-title" id="art-title">Every lead called.<br>Every outcome logged.</h2>
+        <ol class="ticker">
+          <li><span class="av">RV</span><b>Rahul Verma</b><em class="t-int">Interested</em></li>
+          <li><span class="av">AK</span><b>Anjali Kapoor</b><em class="t-cb">Callback · 4 PM</em></li>
+          <li><span class="av">MS</span><b>Mohit Singh</b><em class="t-new">New</em></li>
+          <li><span class="av">NJ</span><b>Neha Joshi</b><em class="t-int">Interested</em></li>
+        </ol>
+        <p class="gate-foot" id="art-foot">One tap to call. Two to log it. Your manager sees it live.</p>
+      </aside>
+
+      <div class="gate-form">
+        <!-- Log in -->
+        <div class="step" data-step="login">
+          <h1>Welcome back</h1>
+          <p class="lead">Log in to your company account.</p>
+          <div class="google-slot" data-google></div>
+          <div class="or"><span>or</span></div>
+          <form id="pw-login" novalidate>
+            <div class="field">
+              <label for="login-user">Email or username</label>
+              <input id="login-user" name="username" required autocomplete="username" autocapitalize="none" spellcheck="false">
+            </div>
+            <div class="field">
+              <div class="label-row"><label for="login-pass">Password</label><button type="button" class="link-btn" data-go="reset">Forgot password?</button></div>
+              <div class="pw">
+                <input id="login-pass" name="password" type="password" required autocomplete="current-password">
+                <button type="button" aria-pressed="false" aria-label="Show password">Show</button>
+              </div>
+            </div>
+            <button class="btn btn-primary" type="submit">Log in</button>
+          </form>
+          <p class="err" data-error role="alert"></p>
+          <p class="switch">Don't have an account? <button type="button" class="link-btn" data-go="signup">Sign up</button></p>
+          <p class="fine">Callers: use the CallerCRM app with the login your admin gave you.</p>
         </div>
 
-        <div class="auth-card">
-          <div class="auth-step" data-step="google">
-            <h2>Log in</h2>
-            <p class="lead">For company admins. Continue with Google, or use the same login as the app.</p>
-            <div class="google-slot" id="google-button"></div>
-            <p class="auth-error" id="google-error" role="alert"></p>
-            <div class="or"><span>or</span></div>
-            <form id="pw-login" novalidate>
+        <!-- Sign up: Google first -->
+        <div class="step" data-step="signup" hidden>
+          <h1 id="signup-title">Start your free trial</h1>
+          <p class="lead" id="signup-lead">14 days of every Pro feature, up to 12 callers. No card needed.</p>
+          <div class="google-slot" data-google></div>
+          <p class="err" data-error role="alert"></p>
+          <p class="fine">We use your Google account to confirm your email and to let you reset your password. You'll set an app password next.</p>
+          <p class="switch">Already have an account? <button type="button" class="link-btn" data-go="login">Log in</button></p>
+        </div>
+
+        <!-- Sign up: company details -->
+        <div class="step" data-step="details" hidden>
+          <h1>About your company</h1>
+          <p class="who">Signed in as <b data-who></b> · <button type="button" class="link-btn" data-go="signup">Use another account</button></p>
+          <form id="signup-form" novalidate>
+            <div class="fields">
+              <div class="field wide">
+                <label for="companyName">Company name</label>
+                <input id="companyName" name="companyName" required maxlength="100" autocomplete="organization">
+              </div>
               <div class="field">
-                <label for="login-user">Email or username</label>
-                <input id="login-user" name="username" required autocomplete="username" autocapitalize="none" spellcheck="false">
+                <label for="name">Your name</label>
+                <input id="name" name="name" required maxlength="80" autocomplete="name">
               </div>
               <div class="field">
-                <label for="login-pass">Password</label>
-                <div class="pw">
-                  <input id="login-pass" name="password" type="password" required autocomplete="current-password">
-                  <button type="button" aria-pressed="false" aria-label="Show password">Show</button>
-                </div>
+                <label for="phone">Mobile number</label>
+                <input id="phone" name="phone" type="tel" inputmode="numeric" required pattern="[+0-9 \-]{10,16}" placeholder="98765 43210" autocomplete="tel-national">
+                <span class="field-err" id="phone-error" role="alert"></span>
               </div>
-              <button class="btn btn-primary" type="submit">Log in</button>
-              <p class="auth-error" id="login-error" role="alert"></p>
-            </form>
-            <p class="auth-note" style="margin-top:1.2rem">New to CallerCRM? <a href="/signup/">Start a free trial</a> · <a href="/reset-password/">Forgot password?</a><br>Callers: use the CallerCRM app with the login your admin gave you.</p>
-          </div>
-
-                    <div class="auth-step" data-step="account" hidden>
-            <span class="eyebrow" id="acc-plan"></span>
-            <h2 id="acc-company"></h2>
-            <p class="acc-status" id="acc-status"></p>
-            <dl class="acc-rows">
-              <div><dt>Callers</dt><dd id="acc-callers"></dd></div>
-              <div><dt>App login</dt><dd><span id="acc-login"></span></dd></div>
-              <div id="acc-phone-row"><dt>Phone</dt><dd id="acc-phone"></dd></div>
-              <div id="acc-city-row"><dt>City</dt><dd id="acc-city"></dd></div>
-              <div id="acc-team-row"><dt>Team size</dt><dd id="acc-team"></dd></div>
-              <div id="acc-gst-row"><dt>GST number</dt><dd id="acc-gst"></dd></div>
-              <div><dt>Customer since</dt><dd id="acc-since"></dd></div>
-            </dl>
-            <p class="acc-return" id="acc-return" role="status" hidden></p>
-
-            <!-- Automatic payments on -->
-            <section class="billing" id="bill-active" hidden>
-              <h3>Automatic payments</h3>
-              <p class="bill-line"><b id="bill-active-plan"></b> · <span id="bill-active-price"></span></p>
-              <p class="bill-line muted">Next charge: <b id="bill-next"></b>. Cashfree takes it from your UPI or card by itself.</p>
-              <button class="link-btn" type="button" id="bill-cancel">Cancel automatic payments</button>
-              <p class="bill-hint">To change plan, cancel first, then choose the new plan. Your current plan runs until its end date.</p>
-              <p class="auth-error" id="bill-cancel-error" role="alert"></p>
-            </section>
-
-            <!-- Choose a plan -->
-            <section class="billing" id="bill-pick" hidden>
-              <h3 id="bill-pick-title">Choose your plan</h3>
-              <div class="seg" role="group" aria-label="Billing period">
-                <button type="button" class="is-on" data-interval="MONTH" aria-pressed="true">Monthly</button>
-                <button type="button" data-interval="YEAR" aria-pressed="false">Yearly <span class="save">2 months free</span></button>
-              </div>
-              <div class="plan-opts" role="radiogroup" aria-label="Plan">
-                <label class="plan-opt"><input type="radio" name="bill-plan" value="STARTER"><span><b>Starter</b><small>10 callers · calling and Google Sheets</small></span><em data-price="STARTER"></em></label>
-                <label class="plan-opt"><input type="radio" name="bill-plan" value="PRO" checked><span><b>Pro</b><small>12 callers · plus WhatsApp on your number</small></span><em data-price="PRO"></em></label>
-              </div>
-              <div class="packs">
-                <span><b>Extra callers</b><small id="bill-pack-price"></small></span>
-                <div class="stepper">
-                  <button type="button" id="bill-minus" aria-label="Fewer extra callers">−</button>
-                  <output id="bill-extra" aria-live="polite">0</output>
-                  <button type="button" id="bill-plus" aria-label="More extra callers">+</button>
-                </div>
-              </div>
-              <div class="bill-total">
-                <span>Total <small id="bill-callers"></small></span>
-                <b id="bill-total"></b>
-              </div>
-              <p class="bill-discount" id="bill-discount" hidden></p>
-              <p class="bill-hint" id="bill-first"></p>
-              <div class="fields bill-contact" id="bill-contact" hidden>
-                <div class="field" id="bill-email-field">
-                  <label for="bill-email">Email for payment receipts</label>
-                  <input id="bill-email" type="email" autocomplete="email" autocapitalize="none">
-                </div>
-                <div class="field" id="bill-phone-field">
-                  <label for="bill-phone">Mobile for UPI Autopay</label>
-                  <input id="bill-phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="98765 43210">
-                </div>
-              </div>
-              <button class="btn btn-primary" type="button" id="bill-go">Continue to payment</button>
-              <a class="btn btn-primary" id="bill-wa" href="https://wa.me/917898131225" target="_blank" rel="noopener" hidden>Pay on WhatsApp</a>
-              <p class="auth-error" id="bill-error" role="alert"></p>
-              <p class="bill-hint">Secure payment by Cashfree: UPI Autopay or card. Cancel any time here.</p>
-            </section>
-
-            <section class="billing" id="bill-history" hidden>
-              <h3>Payments</h3>
-              <ul class="bill-list" id="bill-list"></ul>
-            </section>
-
-            <div class="acc-actions">
-              <button class="btn btn-ghost" type="button" id="acc-password-toggle">Change password</button>
-            </div>
-            <form id="reset-form" novalidate hidden>
               <div class="field">
-                <label for="password">New app password</label>
+                <label for="city">City and state</label>
+                <input id="city" name="city" required maxlength="100" placeholder="Indore, Madhya Pradesh" autocomplete="address-level2">
+              </div>
+              <div class="field">
+                <label for="teamSize">Callers in your team</label>
+                <select id="teamSize" name="teamSize" required>
+                  <option value="" selected disabled>Choose</option>
+                  <option value="1-5">1–5</option>
+                  <option value="6-12">6–12</option>
+                  <option value="13-25">13–25</option>
+                  <option value="26+">26 or more</option>
+                </select>
+              </div>
+              <div class="field wide">
+                <label for="gstNumber">GST number <span>(optional)</span></label>
+                <input id="gstNumber" name="gstNumber" maxlength="15" autocapitalize="characters" placeholder="22AAAAA0000A1Z5">
+              </div>
+              <div class="field">
+                <label for="username">Username <span>(optional)</span></label>
+                <input id="username" name="username" maxlength="40" pattern="[A-Za-z0-9._\-]{3,40}" autocomplete="username" autocapitalize="none">
+                <span class="hint">Or log in with your email.</span>
+              </div>
+              <div class="field">
+                <label for="password">App password</label>
                 <div class="pw">
                   <input id="password" name="password" type="password" required minlength="8" autocomplete="new-password">
                   <button type="button" aria-pressed="false" aria-label="Show password">Show</button>
                 </div>
-                <span class="hint">At least 8 characters. You'll be logged out of the app on every phone.</span>
+                <span class="hint">At least 8 characters.</span>
               </div>
-              <button class="btn btn-primary" type="submit">Save new password</button>
-              <p class="auth-error" id="reset-error" role="alert"></p>
-              <p class="acc-saved" id="reset-saved" role="status"></p>
-            </form>
-            <p class="auth-note acc-foot">Signed in as <span id="who-email"></span> · <button type="button" class="link-btn" data-signout>Log out</button></p>
+            </div>
+            <label class="agree"><input type="checkbox" name="agree" required> <span>I agree to the <a href="/terms/" target="_blank">Terms of Service</a> and <a href="/privacy/" target="_blank">Privacy Policy</a>.</span></label>
+            <button class="btn btn-primary" type="submit" id="signup-submit">Create my company</button>
+          </form>
+          <p class="err" data-error role="alert"></p>
+        </div>
+
+        <!-- Forgot password -->
+        <div class="step" data-step="reset" hidden>
+          <h1>Reset your password</h1>
+          <p class="lead">For admins who signed up with Google. Continue with that Google account, then choose a new app password.</p>
+          <div class="google-slot" data-google></div>
+          <form id="reset-form" novalidate hidden>
+            <p class="who">Signed in as <b data-who></b></p>
+            <div class="field">
+              <label for="reset-pass">New app password</label>
+              <div class="pw">
+                <input id="reset-pass" name="password" type="password" required minlength="8" autocomplete="new-password">
+                <button type="button" aria-pressed="false" aria-label="Show password">Show</button>
+              </div>
+              <span class="hint">At least 8 characters. You'll be logged out of the app on every phone.</span>
+            </div>
+            <button class="btn btn-primary" type="submit">Save new password</button>
+          </form>
+          <p class="ok" data-ok role="status"></p>
+          <p class="err" data-error role="alert"></p>
+          <p class="fine">Callers: ask your company's admin to reset your password in the app.</p>
+          <p class="switch"><button type="button" class="link-btn" data-go="login">Back to log in</button></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Company dashboard ─────────────────────────────────────────── -->
+    <section class="dash" id="dash" hidden>
+      <div class="dash-head">
+        <div>
+          <span class="plan-pill" id="d-plan"></span>
+          <h1 id="d-company"></h1>
+          <p class="dash-sub">Signed in as <b id="d-who"></b> · <button type="button" class="link-btn" id="logout">Log out</button></p>
+        </div>
+        <a class="btn btn-ghost btn-sm" href="https://play.google.com/store/apps/details?id=com.codebyakshay.callercrm" target="_blank" rel="noopener">Get the app</a>
+      </div>
+
+      <p class="banner" id="d-banner" role="status" hidden></p>
+
+      <div class="dash-grid">
+        <div class="col">
+        <!-- Plan & status -->
+        <article class="card card-status">
+          <h2>Plan</h2>
+          <p class="status" id="d-status"></p>
+          <div class="meter-wrap">
+            <div class="meter-label"><span>Callers</span><b id="d-callers"></b></div>
+            <div class="meter"><span id="d-meter"></span></div>
           </div>
+          <dl class="kv">
+            <div><dt>App login</dt><dd id="d-login"></dd></div>
+            <div><dt>Customer since</dt><dd id="d-since"></dd></div>
+          </dl>
+        </article>
+        <!-- Company profile -->
+        <article class="card card-profile">
+          <h2>Company</h2>
+          <dl class="kv">
+            <div id="p-phone-row"><dt>Phone</dt><dd id="p-phone"></dd></div>
+            <div id="p-city-row"><dt>City</dt><dd id="p-city"></dd></div>
+            <div id="p-team-row"><dt>Team size</dt><dd id="p-team"></dd></div>
+            <div id="p-gst-row"><dt>GST number</dt><dd id="p-gst"></dd></div>
+          </dl>
+          <p class="fine">To change these, message us on <a href="https://wa.me/917898131225" target="_blank" rel="noopener">WhatsApp</a>.</p>
+        </article>
+        <!-- Payments -->
+        <article class="card card-payments">
+          <h2>Payments</h2>
+          <ul class="pay-list" id="pay-list"></ul>
+          <p class="muted" id="pay-empty">No payments yet.</p>
+        </article>
+        </div>
+        <div class="col">
+        <!-- Billing -->
+        <article class="card card-billing" id="billing">
+          <!-- automatic payments on -->
+          <div id="b-active" hidden>
+            <h2>Automatic payments</h2>
+            <p class="big"><span id="b-active-plan"></span> <b id="b-active-price"></b></p>
+            <p class="muted">Next charge <b id="b-next"></b>, from your UPI or card, by itself.</p>
+            <button class="link-btn danger" type="button" id="b-cancel">Cancel automatic payments</button>
+            <p class="fine">Your plan keeps working until its end date. To change plan or callers, cancel, then choose again.</p>
+            <p class="err" id="b-cancel-error" role="alert"></p>
+          </div>
+
+          <!-- choose a plan -->
+          <div id="b-pick" hidden>
+            <h2 id="b-title">Choose your plan</h2>
+            <div class="seg" role="group" aria-label="Billing period">
+              <button type="button" class="is-on" data-interval="MONTH" aria-pressed="true">Monthly</button>
+              <button type="button" data-interval="YEAR" aria-pressed="false">Yearly <span class="save">2 months free</span></button>
+            </div>
+            <div class="plan-opts" role="radiogroup" aria-label="Plan">
+              <label class="plan-opt"><input type="radio" name="b-plan" value="STARTER"><span><b>Starter</b><small>10 callers · calling and Google Sheets</small></span><em data-price="STARTER"></em></label>
+              <label class="plan-opt"><input type="radio" name="b-plan" value="PRO" checked><span><b>Pro</b><small>12 callers · plus WhatsApp on your number</small></span><em data-price="PRO"></em></label>
+            </div>
+            <div class="packs">
+              <span><b>Extra callers</b><small id="b-pack-price"></small></span>
+              <div class="stepper">
+                <button type="button" id="b-minus" aria-label="Fewer extra callers">−</button>
+                <output id="b-extra" aria-live="polite">+0</output>
+                <button type="button" id="b-plus" aria-label="More extra callers">+</button>
+              </div>
+            </div>
+            <div class="total"><span>Total <small id="b-callers"></small></span><b id="b-total"></b></div>
+            <p class="discount" id="b-discount" hidden></p>
+            <div class="fields contact" id="b-contact" hidden>
+              <div class="field" id="b-email-field">
+                <label for="b-email">Email for payment receipts</label>
+                <input id="b-email" type="email" autocomplete="email" autocapitalize="none">
+              </div>
+              <div class="field" id="b-phone-field">
+                <label for="b-phone">Mobile for UPI Autopay</label>
+                <input id="b-phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="98765 43210">
+              </div>
+            </div>
+            <div class="pay-actions">
+              <button class="btn btn-primary" type="button" id="b-now"></button>
+              <button class="btn btn-ghost" type="button" id="b-later" hidden></button>
+              <a class="btn btn-primary" id="b-wa" href="https://wa.me/917898131225" target="_blank" rel="noopener" hidden>Pay on WhatsApp</a>
+            </div>
+            <p class="fine" id="b-note"></p>
+            <p class="err" id="b-error" role="alert"></p>
+          </div>
+        </article>
+        <!-- Password -->
+        <article class="card card-security">
+          <h2>App password</h2>
+          <form id="change-form" novalidate>
+            <div class="field">
+              <label for="new-pass">New password</label>
+              <div class="pw">
+                <input id="new-pass" name="password" type="password" required minlength="8" autocomplete="new-password">
+                <button type="button" aria-pressed="false" aria-label="Show password">Show</button>
+              </div>
+              <span class="hint">At least 8 characters. Logs you out of the app on every phone.</span>
+            </div>
+            <button class="btn btn-ghost" type="submit">Change password</button>
+          </form>
+          <p class="ok" id="change-ok" role="status"></p>
+          <p class="err" id="change-error" role="alert"></p>
+        </article>
         </div>
       </div>
     </section>
   </main>
-
-  <footer class="site-footer">
-    <div class="container">
-      <div class="footer-grid">
-        <div>
-          <a class="brand" href="/"><img src="/assets/img/icon-192.png" alt="" width="36" height="36">CallerCRM</a>
-          <p>The calling CRM for tele-sales teams.<br>A product of CodeByAkshay, made in India.</p>
-        </div>
-        <div>
-          <h4>Product</h4>
-          <ul>
-            <li><a href="/#how">How it works</a></li>
-            <li><a href="/#tour">Product tour</a></li>
-            <li><a href="/#features">Features</a></li>
-            <li><a href="/#pricing">Pricing</a></li>
-            <li><a href="/#faq">FAQ</a></li>
-            <li><a href="https://wa.me/917898131225?text=Hi%2C%20I%27d%20like%20to%20start%20a%20CallerCRM%20free%20trial.%0ACompany%3A%20%0ANumber%20of%20callers%3A%20" target="_blank" rel="noopener">WhatsApp: +91 78981 31225</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4>Legal</h4>
-          <ul>
-            <li><a href="/privacy/">Privacy Policy</a></li>
-            <li><a href="/terms/">Terms of Service</a></li>
-            <li><a href="/delete-account/">Delete your account</a></li>
-            <li><a href="/refunds/">Refund &amp; Cancellation</a></li>
-            <li><a href="/delivery/">Delivery Policy</a></li>
-            <li><a href="/contact/">Contact us</a></li>
-            <li><a href="mailto:privacy@codebyakshay.com">privacy@codebyakshay.com</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© <span data-year>2026</span> CodeByAkshay. All rights reserved.</span>
-        <span>Udyam Registration No. UDYAM-MP-15-0022478</span>
-      </div>
-    </div>
-  </footer>
 </body>
 </html>

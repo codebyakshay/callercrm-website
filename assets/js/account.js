@@ -1,0 +1,524 @@
+// /account: log in, sign up, reset password and the company dashboard, on one page.
+// Company admins sign in with Google, or with the same email/username + password as the app.
+// The server checks everything again (Google's token, our login token, prices); this file only
+// decides what to show.
+const API = "https://api.callercrm.codebyakshay.com/api/signup";
+const BILLING_API = "https://api.callercrm.codebyakshay.com/api/billing";
+const GOOGLE_CLIENT_ID = "135149357843-kh5reev4cvesdos3p1uvsq2b044edrdd.apps.googleusercontent.com";
+const PLAY_URL = "https://play.google.com/store/apps/details?id=com.codebyakshay.callercrm";
+const WHATSAPP = "917898131225";
+// Same as the pricing section and the server (src/lib/pricing.ts). The server sets the real amount.
+const PRICES = { STARTER: { name: "Starter", base: 249, seats: 10, pack: 69 }, PRO: { name: "Pro", base: 499, seats: 12, pack: 85 } };
+const PLAN_LABEL = { TRIAL: "Free trial · every Pro feature", STARTER: "Starter plan", PRO: "Pro plan" };
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+const params = new URLSearchParams(location.search);
+const wantedPlan = { starter: "STARTER", pro: "PRO" }[params.get("plan")] || null;
+
+// ── Small helpers ───────────────────────────────────────────────────────
+const rupees = (n) => `₹${n.toLocaleString("en-IN")}`;
+const dayKey = (d) => d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+const addDaysKey = (key, n) => dayKey(new Date(Date.parse(`${key}T12:00:00+05:30`) + n * 864e5));
+const niceDay = (key) =>
+  new Date(`${key}T12:00:00+05:30`).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" });
+
+async function post(url, body) {
+  let res;
+  try {
+    res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  } catch {
+    return { ok: false, status: 0, data: { error: "Couldn't reach CallerCRM. Check your internet and try again." } };
+  }
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, data };
+}
+
+function busy(btn, on, label) {
+  if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+  btn.disabled = on;
+  btn.textContent = on ? label : btn.dataset.label;
+}
+
+// ── Remembered login (this tab only) ────────────────────────────────────
+// Google's token lasts ~1 hour, our password-login token 12 hours; both are JWTs with an expiry.
+const KEYS = { google: "callercrm.google", web: "callercrm.web" };
+function remember(kind, token) {
+  try { sessionStorage.setItem(KEYS[kind], token); } catch { /* private mode: this page only */ }
+}
+function remembered(kind) {
+  try {
+    const token = sessionStorage.getItem(KEYS[kind]);
+    if (!token) return null;
+    const { exp } = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    if (exp * 1000 > Date.now() + 60000) return token;
+    sessionStorage.removeItem(KEYS[kind]);
+  } catch { /* unreadable: log in again */ }
+  return null;
+}
+function forgetAll() {
+  try { Object.values(KEYS).forEach((k) => sessionStorage.removeItem(k)); } catch { /* nothing stored */ }
+}
+
+// ── Steps ───────────────────────────────────────────────────────────────
+const ART = {
+  login: ["For calling teams", "Every lead called.<br>Every outcome logged.", "One tap to call. Two to log it. Your manager sees it live."],
+  signup: ["Get started", "Your team calling<br>in ten minutes.", "Import from Google Sheets, assign in bulk, and watch every call come in."],
+  details: ["Almost there", "Tell us about<br>your company.", "You'll be the admin. Add your callers from the app."],
+  reset: ["Account", "Back in<br>a minute.", "Confirm it's you with Google, then choose a new app password."],
+};
+let step = "login";
+let google = null; // Google ID token from this visit's sign-in
+
+function show(next, message = "") {
+  step = next;
+  $("#gate").hidden = false;
+  $("#dash").hidden = true;
+  $$(".step").forEach((el) => (el.hidden = el.dataset.step !== next));
+  const [kicker, title, foot] = ART[next] || ART.login;
+  $("#art-kicker").textContent = kicker;
+  $("#art-title").innerHTML = title;
+  $("#art-foot").textContent = foot;
+  const current = $(`[data-step="${next}"]`);
+  $$("[data-error]", current).forEach((e) => (e.textContent = message));
+  renderGoogleButton(current);
+  window.scrollTo({ top: 0 });
+}
+
+function stepError(message) {
+  $$("[data-error]", $(`[data-step="${step}"]`)).forEach((e) => (e.textContent = message));
+}
+
+// ── Google ──────────────────────────────────────────────────────────────
+function onGoogleReady(fn) {
+  if (window.google?.accounts?.id) fn();
+  else window.addEventListener("google-loaded", fn, { once: true });
+}
+window.onGoogleLibraryLoad = () => window.dispatchEvent(new Event("google-loaded"));
+
+let googleStarted = false;
+function startGoogle() {
+  if (googleStarted) return;
+  googleStarted = true;
+  window.google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: (r) => onGoogle(r.credential),
+    ux_mode: "popup",
+    auto_select: true,
+    cancel_on_tap_outside: true,
+  });
+}
+
+function renderGoogleButton(container) {
+  const slot = $("[data-google]", container);
+  if (!slot) return;
+  onGoogleReady(() => {
+    startGoogle();
+    slot.replaceChildren();
+    window.google.accounts.id.renderButton(slot, {
+      theme: "outline", size: "large", shape: "pill", logo_alignment: "center", width: Math.min(340, slot.clientWidth || 340),
+      text: step === "signup" ? "signup_with" : "continue_with",
+    });
+  });
+}
+
+async function onGoogle(token) {
+  google = token;
+  remember("google", token);
+  stepError("");
+  if (step === "reset") return googleForReset(token);
+  if (step === "signup") {
+    const { ok, data } = await post(`${API}/check`, { credential: token });
+    if (!ok) return stepError(data.error || "Google sign-in didn't work. Please try again.");
+    if (data.exists) return loadAccount({ credential: token });
+    $$("[data-who]").forEach((b) => (b.textContent = data.email));
+    const form = $("#signup-form");
+    if (!form.name.value) form.name.value = data.name || "";
+    return show("details");
+  }
+  // Log in with a Google account that has no company yet: that's a sign-up.
+  loadAccount({ credential: token }, { noCompany: () => onGoogleSignup(token) });
+}
+
+async function onGoogleSignup(token) {
+  step = "signup";
+  await onGoogle(token);
+}
+
+// ── Log in with password ────────────────────────────────────────────────
+function initPasswordLogin() {
+  const form = $("#pw-login");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    stepError("");
+    if (!form.reportValidity()) return;
+    const btn = $("button[type=submit]", form);
+    busy(btn, true, "Logging in…");
+    const { ok, data } = await post(`${API}/login`, { username: form.username.value, password: form.password.value });
+    busy(btn, false);
+    if (!ok) return stepError(data.error || "Couldn't log you in. Please try again.");
+    remember("web", data.token);
+    form.reset();
+    loadAccount({ token: data.token });
+  });
+}
+
+// ── Sign up: company details ────────────────────────────────────────────
+function initSignup() {
+  const form = $("#signup-form");
+  const phone = form.phone;
+  phone.addEventListener("input", () => { phone.setCustomValidity(""); $("#phone-error").textContent = ""; });
+  phone.addEventListener("change", async () => {
+    if (!google || phone.value.replace(/\D/g, "").length < 10) return;
+    const { ok, data } = await post(`${API}/check`, { credential: google, phone: phone.value });
+    if (ok && data.phoneTaken) {
+      const msg = "This number already has a CallerCRM company (one per number). Use another number, or log in.";
+      phone.setCustomValidity(msg);
+      $("#phone-error").textContent = msg;
+    }
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    stepError("");
+    if (!form.reportValidity()) return;
+    const btn = $("#signup-submit");
+    busy(btn, true, "Creating your company…");
+    const f = new FormData(form);
+    const { ok, status, data } = await post(API, {
+      credential: google,
+      companyName: f.get("companyName"), name: f.get("name"), phone: f.get("phone"), city: f.get("city"),
+      teamSize: f.get("teamSize"), gstNumber: f.get("gstNumber"), username: f.get("username"), password: f.get("password"),
+    });
+    busy(btn, false);
+    if (!ok) {
+      if (status === 401) return show("signup", data.error);
+      return stepError(data.error || "Something went wrong. Please try again.");
+    }
+    form.reset();
+    loadAccount({ credential: google }, { justSignedUp: true });
+  });
+}
+
+// ── Forgot password ─────────────────────────────────────────────────────
+async function googleForReset(token) {
+  const { ok, data } = await post(`${API}/check`, { credential: token });
+  if (!ok) return stepError(data.error || "Google sign-in didn't work. Please try again.");
+  if (!data.exists) return stepError(`${data.email} doesn't have a CallerCRM company. Try another Google account, or sign up.`);
+  $$("[data-who]").forEach((b) => (b.textContent = data.email));
+  $("#reset-form").hidden = false;
+  $("[data-google]", $('[data-step="reset"]')).hidden = true;
+}
+
+function initReset() {
+  const form = $("#reset-form");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    stepError("");
+    if (!form.reportValidity()) return;
+    const btn = $("button[type=submit]", form);
+    busy(btn, true, "Saving…");
+    const { ok, status, data } = await post(`${API}/reset-password`, { credential: google, password: form.password.value });
+    busy(btn, false);
+    if (!ok) return status === 401 ? show("reset", data.error) : stepError(data.error || "Something went wrong.");
+    form.reset();
+    form.hidden = true;
+    $("[data-ok]", $('[data-step="reset"]')).textContent =
+      `Password saved. Log in to the app with ${data.email || data.username} and your new password.`;
+  });
+}
+
+// ── Dashboard ───────────────────────────────────────────────────────────
+let auth = null; // { credential } or { token }: sent with every dashboard call
+let account = null;
+const bill = { plan: wantedPlan || "PRO", interval: "MONTH", packs: 0, discount: 0 };
+
+async function loadAccount(authBody, { justSignedUp = false, noCompany } = {}) {
+  const { ok, status, data } = await post(`${API}/account`, authBody);
+  if (status === 404) {
+    if (noCompany) return noCompany();
+    return show("signup", "This Google account doesn't have a company yet. Create one below.");
+  }
+  if (!ok) {
+    forgetAll();
+    return show("login", status === 401 && authBody.token ? "Your login has expired. Please log in again." : data.error || "");
+  }
+  auth = authBody;
+  account = data;
+  renderDashboard(justSignedUp);
+}
+
+function renderDashboard(justSignedUp) {
+  const d = account;
+  $("#gate").hidden = true;
+  $("#dash").hidden = false;
+  window.scrollTo({ top: 0 });
+
+  $("#d-plan").textContent = PLAN_LABEL[d.plan] || d.plan;
+  $("#d-company").textContent = d.company;
+  $("#d-who").textContent = d.email || d.username;
+
+  const st = $("#d-status");
+  st.className = "status";
+  if (d.suspended) {
+    st.classList.add("bad");
+    st.textContent = "This account is suspended. Message us on WhatsApp.";
+  } else if (d.notice) {
+    st.classList.add(d.notice.tone === "bad" ? "bad" : "warn");
+    st.textContent = `${d.notice.title}. ${d.notice.text}`;
+  } else if (d.paidUntil) {
+    st.textContent = d.plan === "TRIAL" ? `Free trial until ${niceDay(d.paidUntil)}` : `Paid until ${niceDay(d.paidUntil)}`;
+  } else {
+    st.textContent = "Active";
+  }
+  $("#d-callers").textContent = d.seatLimit ? `${d.callers} of ${d.seatLimit}` : `${d.callers}`;
+  requestAnimationFrame(() => ($("#d-meter").style.width = d.seatLimit ? `${Math.min(100, (d.callers / d.seatLimit) * 100)}%` : "8%"));
+  $("#d-login").textContent = d.email ? `${d.email} or ${d.username}` : d.username;
+  $("#d-since").textContent = d.profile?.since ? niceDay(d.profile.since) : "—";
+
+  const p = d.profile || {};
+  const row = (id, value) => { $(`#${id}`).textContent = value ?? ""; $(`#${id}-row`).hidden = !value; };
+  row("p-phone", p.phone ? `+91 ${p.phone}` : null);
+  row("p-city", p.city);
+  row("p-team", p.teamSize ? `${p.teamSize} callers` : null);
+  row("p-gst", p.gstNumber);
+
+  renderBilling();
+  renderPayments();
+
+  const banner = $("#d-banner");
+  banner.className = "banner";
+  banner.hidden = true;
+  if (params.has("subscription")) {
+    banner.hidden = false;
+    banner.textContent = d.subscription
+      ? "Payment set up. You're all set."
+      : "Thanks! If you approved the payment, it can take a minute to show here. Reload in a minute.";
+  } else if (justSignedUp && wantedPlan) {
+    banner.hidden = false;
+    banner.textContent = `Your company is ready. Pay below to start ${PRICES[wantedPlan].name} today, then add your callers in the app.`;
+  } else if (justSignedUp) {
+    banner.hidden = false;
+    banner.innerHTML = `Your 14-day free trial has started. <a href="${PLAY_URL}" target="_blank" rel="noopener">Install the app</a>, log in, and add your callers.`;
+  }
+  if ((justSignedUp && wantedPlan) || (wantedPlan && !$("#b-pick").hidden)) {
+    setTimeout(() => $("#billing").scrollIntoView({ behavior: "smooth", block: "start" }), 250);
+  }
+}
+
+// ── Billing ─────────────────────────────────────────────────────────────
+function priceOf(plan, interval, packs) {
+  const monthly = PRICES[plan].base + packs * PRICES[plan].pack;
+  const full = interval === "YEAR" ? monthly * 10 : monthly;
+  return Math.round((full * (100 - bill.discount)) / 100); // same rounding as the server
+}
+
+/** Mirrors the server: can the first charge wait for the trial / current period to end? */
+function deferral() {
+  const today = dayKey(new Date());
+  const paidUntil = account.paidUntil;
+  if (paidUntil && paidUntil <= today) return null;
+  const earliest = addDaysKey(today, 2);
+  const after = paidUntil ? addDaysKey(paidUntil, 1) : earliest;
+  return after > earliest ? after : earliest;
+}
+
+function renderBilling() {
+  const d = account;
+  bill.discount = d.discountPct || 0;
+  const sub = d.subscription;
+  $("#b-active").hidden = !sub;
+  $("#b-pick").hidden = Boolean(sub) || d.suspended;
+  if (sub) {
+    const extra = sub.extraPacks ? ` + ${sub.extraPacks * 5} callers` : "";
+    $("#b-active-plan").textContent = `${PRICES[sub.plan]?.name ?? sub.plan}${extra}`;
+    $("#b-active-price").textContent = rupees(sub.amount) + (sub.interval === "YEAR" ? "/year" : "/month");
+    const next = d.payments.length ? addDaysKey(d.paidUntil, 1) : sub.firstChargeDay;
+    $("#b-next").textContent = niceDay(next);
+    return;
+  }
+  $("#b-title").textContent = d.plan === "TRIAL" ? "Choose your plan" : "Pay for your plan";
+  $(`input[name="b-plan"][value="${bill.plan}"]`).checked = true;
+  $("#b-contact").hidden = !d.paymentsOpen || !(d.needEmail || d.needPhone);
+  $("#b-email-field").hidden = !d.needEmail;
+  $("#b-phone-field").hidden = !d.needPhone;
+  drawPicker();
+}
+
+function drawPicker() {
+  const d = account;
+  const per = bill.interval === "YEAR" ? "/year" : "/month";
+  const every = bill.interval === "YEAR" ? "year" : "month";
+  $$("[data-price]").forEach((el) => (el.textContent = rupees(priceOf(el.dataset.price, bill.interval, 0)) + per));
+  $$("[data-interval]").forEach((b) => {
+    const on = b.dataset.interval === bill.interval;
+    b.classList.toggle("is-on", on);
+    b.setAttribute("aria-pressed", String(on));
+  });
+  const p = PRICES[bill.plan];
+  const packPrice = Math.round(((bill.interval === "YEAR" ? p.pack * 10 : p.pack) * (100 - bill.discount)) / 100);
+  $("#b-pack-price").textContent = `Packs of 5, ${rupees(packPrice)}${per} each`;
+  $("#b-extra").textContent = `+${bill.packs * 5}`;
+  $("#b-minus").disabled = bill.packs === 0;
+  $("#b-plus").disabled = bill.packs === 20;
+  $("#b-callers").textContent = `${p.seats + bill.packs * 5} callers`;
+  const total = priceOf(bill.plan, bill.interval, bill.packs);
+  $("#b-total").textContent = rupees(total) + per;
+  $("#b-discount").hidden = !bill.discount;
+  $("#b-discount").textContent = `Founding customer price: ${bill.discount}% off, for as long as you stay.`;
+
+  // Which ways to pay: now (plan starts today), and/or when the trial / paid period ends.
+  const later = deferral();
+  const trial = d.plan === "TRIAL";
+  const nowBtn = $("#b-now");
+  const laterBtn = $("#b-later");
+  nowBtn.hidden = !d.paymentsOpen || (!trial && Boolean(later));
+  laterBtn.hidden = !d.paymentsOpen || !later;
+  $("#b-wa").hidden = d.paymentsOpen;
+  nowBtn.textContent = trial ? `Start ${p.name} now · pay ${rupees(total)}` : `Pay ${rupees(total)} and continue`;
+  nowBtn.dataset.label = nowBtn.textContent;
+  laterBtn.textContent = trial ? `Pay when my trial ends (${niceDay(later || dayKey(new Date()))})` : `Renew automatically from ${niceDay(later || dayKey(new Date()))}`;
+  laterBtn.dataset.label = laterBtn.textContent;
+  laterBtn.classList.toggle("btn-primary", nowBtn.hidden);
+  laterBtn.classList.toggle("btn-ghost", !nowBtn.hidden);
+
+  const notes = [];
+  if (!nowBtn.hidden) notes.push(`${rupees(total)} is charged today and your plan starts now. Then every ${every} on the same date.`);
+  if (!laterBtn.hidden) notes.push(`${trial ? "Pay when your trial ends" : "Automatic renewal"}: nothing today (₹1 is checked and refunded), first charge on ${niceDay(later)}.`);
+  if (d.paymentsOpen) notes.push("Secure payment by Cashfree: UPI Autopay or card. Cancel any time here.");
+  $("#b-note").textContent = notes.join(" ");
+
+  if (!d.paymentsOpen) {
+    const msg = `Hi, I'd like to pay for CallerCRM.\nCompany: ${d.company}\nLogin: ${d.email || d.username}\nPlan: ${p.name} ${every}ly, ${p.seats + bill.packs * 5} callers (${rupees(total)}${per})`;
+    $("#b-wa").href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
+  }
+}
+
+async function subscribe(startNow, btn) {
+  $("#b-error").textContent = "";
+  busy(btn, true, "Opening secure payment…");
+  const { ok, status, data } = await post(`${BILLING_API}/subscribe`, {
+    ...auth, plan: bill.plan, interval: bill.interval, extraPacks: bill.packs, startNow,
+    email: $("#b-email").value, phone: $("#b-phone").value,
+  });
+  if (!ok) {
+    busy(btn, false);
+    if (status === 401) { forgetAll(); return show("login", data.error); }
+    $("#b-error").textContent = data.error || "Couldn't start the payment. Please try again.";
+    return;
+  }
+  if (!window.Cashfree) {
+    busy(btn, false);
+    $("#b-error").textContent = "The payment page didn't load. Check your internet, reload, and try again.";
+    return;
+  }
+  const result = await window.Cashfree({ mode: data.mode }).subscriptionsCheckout({ subsSessionId: data.sessionId, redirectTarget: "_self" });
+  if (result?.error) {
+    busy(btn, false);
+    $("#b-error").textContent = result.error.message || "The payment page didn't open. Please try again.";
+  }
+}
+
+function initBilling() {
+  $$("[data-interval]").forEach((b) => b.addEventListener("click", () => { bill.interval = b.dataset.interval; drawPicker(); }));
+  $$('input[name="b-plan"]').forEach((r) => r.addEventListener("change", () => { bill.plan = r.value; drawPicker(); }));
+  $("#b-minus").addEventListener("click", () => { bill.packs = Math.max(0, bill.packs - 1); drawPicker(); });
+  $("#b-plus").addEventListener("click", () => { bill.packs = Math.min(20, bill.packs + 1); drawPicker(); });
+  $("#b-now").addEventListener("click", (e) => subscribe(true, e.currentTarget));
+  $("#b-later").addEventListener("click", (e) => subscribe(false, e.currentTarget));
+
+  $("#b-cancel").addEventListener("click", async () => {
+    if (!confirm("Stop automatic payments? Your plan keeps working until its end date, then the account turns read-only unless you pay again.")) return;
+    $("#b-cancel-error").textContent = "";
+    const { ok, status, data } = await post(`${BILLING_API}/cancel`, { ...auth });
+    if (!ok) {
+      if (status === 401) { forgetAll(); return show("login", data.error); }
+      $("#b-cancel-error").textContent = data.error || "Couldn't cancel. Please try again.";
+      return;
+    }
+    loadAccount(auth);
+  });
+}
+
+function renderPayments() {
+  const list = account.payments || [];
+  $("#pay-empty").hidden = list.length > 0;
+  $("#pay-list").replaceChildren(
+    ...list.map((p) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span>${niceDay(p.paidOn)}</span><span><b>${rupees(p.amount)}</b> · to ${niceDay(p.coversUntil)}</span>`;
+      return li;
+    }),
+  );
+}
+
+function initDashboard() {
+  initBilling();
+  $("#logout").addEventListener("click", () => {
+    auth = null;
+    account = null;
+    forgetAll();
+    window.google?.accounts?.id?.disableAutoSelect();
+    show("login");
+  });
+  const form = $("#change-form");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    $("#change-ok").textContent = "";
+    $("#change-error").textContent = "";
+    if (!form.reportValidity()) return;
+    const btn = $("button[type=submit]", form);
+    busy(btn, true, "Saving…");
+    const { ok, status, data } = await post(`${API}/reset-password`, { ...auth, password: form.password.value });
+    busy(btn, false);
+    if (!ok) {
+      if (status === 401) { forgetAll(); return show("login", data.error); }
+      $("#change-error").textContent = data.error || "Something went wrong.";
+      return;
+    }
+    form.reset();
+    $("#change-ok").textContent = "Password changed. Log in to the app again with the new one.";
+  });
+}
+
+// ── Start ───────────────────────────────────────────────────────────────
+function initPasswordToggles() {
+  $$(".pw button").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const input = btn.previousElementSibling;
+      const showing = input.type === "text";
+      input.type = showing ? "password" : "text";
+      btn.textContent = showing ? "Show" : "Hide";
+      btn.setAttribute("aria-pressed", String(!showing));
+    }),
+  );
+}
+
+function initSignupCopy() {
+  if (!wantedPlan) return;
+  const p = PRICES[wantedPlan];
+  $("#signup-title").textContent = `Get ${p.name}`;
+  $("#signup-lead").textContent = `Create your company, then pay ${rupees(p.base)}/month and start today. No trial needed.`;
+  $("#signup-submit").textContent = "Create my company and continue to payment";
+}
+
+initPasswordToggles();
+initPasswordLogin();
+initSignup();
+initReset();
+initDashboard();
+initSignupCopy();
+$$("[data-go]").forEach((b) => b.addEventListener("click", () => {
+  if (b.dataset.go === "reset") { $("#reset-form").hidden = true; $("[data-google]", $('[data-step="reset"]')).hidden = false; }
+  show(b.dataset.go);
+}));
+
+// Already logged in on this tab? Straight to the dashboard. Otherwise the step from the link:
+// pricing "Choose Starter/Pro" → sign up for that plan; "Start free trial" → sign up; else log in.
+const mode = params.get("mode");
+const savedWeb = remembered("web");
+const savedGoogle = remembered("google");
+if (mode === "reset") show("reset");
+else if (savedWeb) loadAccount({ token: savedWeb });
+else if (savedGoogle) { google = savedGoogle; loadAccount({ credential: savedGoogle }, { noCompany: () => onGoogleSignup(savedGoogle) }); }
+else show(mode === "signup" || wantedPlan ? "signup" : "login");
