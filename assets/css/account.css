@@ -249,21 +249,61 @@ form .btn, .pay-actions .btn { width: 100%; }
 .pay-list li:last-child { border-bottom: 0; }
 .pay-list b { color: var(--ink); }
 
+/* ── Dashboard tabs ───────────────────────────────────── */
+.tabs { display: flex; gap: 4px; padding: 4px; width: fit-content; max-width: 100%; overflow-x: auto; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm); margin-bottom: 1.25rem; }
+.tabs button { border: 0; background: none; padding: 0.55rem 1.2rem; border-radius: 999px; font-weight: 700; font-size: var(--fs-sm); color: var(--ink-soft); white-space: nowrap; }
+.tabs button[aria-selected="true"] { background: var(--grad-brand); color: #fff; }
+.tabs button:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+.tab-panel { animation: fade 0.25s var(--ease) both; }
+
+/* ── Overview ─────────────────────────────────────────── */
+.ov-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.ov-live { display: inline-flex; align-items: center; gap: 0.5rem; font-size: var(--fs-sm); color: var(--muted); font-weight: 600; }
+.ov-live .dot { width: 8px; height: 8px; border-radius: 50%; background: #1fbf7a; box-shadow: 0 0 0 0 rgb(31 191 122 / 0.5); animation: ov-pulse 2s ease-out infinite; }
+.ov-live.is-past .dot { background: var(--line); animation: none; box-shadow: none; }
+@keyframes ov-pulse { to { box-shadow: 0 0 0 8px rgb(31 191 122 / 0); } }
+.ov-date { display: flex; align-items: center; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.ov-date button { border: 0; background: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1.1rem; color: var(--ink-soft); }
+.ov-date button:hover:not(:disabled) { background: var(--bg-soft); }
+.ov-date button:disabled { opacity: 0.35; }
+.ov-date input { border: 0; background: none; font: inherit; font-size: var(--fs-sm); font-weight: 700; color: var(--ink); padding: 0.3rem 0.4rem; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 1.1rem 1.3rem; box-shadow: var(--shadow-sm); display: grid; gap: 0.2rem; }
+.stat span { font-size: var(--fs-xs); font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.stat b { font-size: clamp(1.6rem, 1.2rem + 1.2vw, 2.2rem); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.stack { display: flex; height: 14px; border-radius: 999px; overflow: hidden; background: var(--bg-soft); gap: 2px; }
+.stack span { display: block; height: 100%; transition: flex-grow 0.6s var(--ease); }
+.legend { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: 0.55rem; font-size: var(--fs-sm); }
+.legend li { display: flex; align-items: center; gap: 0.6rem; }
+.legend i { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.legend b { margin-left: auto; font-variant-numeric: tabular-nums; }
+.legend small { color: var(--muted); font-weight: 600; min-width: 3.2em; text-align: right; }
+.o-int { background: #1fbf7a; } .o-cb { background: #f0a92b; } .o-no { background: #e8637a; } .o-called { background: #b9a6de; } .o-other { background: #8aa3c7; }
+.board-wrap { overflow-x: auto; margin: 0 -0.25rem; }
+.board { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.board th { text-align: right; font-size: var(--fs-xs); color: var(--muted); font-weight: 700; padding: 0 0.25rem 0.6rem; }
+.board th:first-child, .board td:first-child { text-align: left; }
+.board td { text-align: right; padding: 0.6rem 0.25rem; border-top: 1px dashed var(--line); }
+.board td:first-child { font-weight: 700; }
+.board td:first-child small { display: block; font-weight: 500; color: var(--muted); font-size: var(--fs-xs); }
+.board tr.idle td { color: var(--muted); }
+
 /* ── Small screens ────────────────────────────────────── */
 @media (max-width: 880px) {
   .gate { grid-template-columns: minmax(0, 1fr); min-height: 0; }
   .gate-art { padding: 1.6rem 1.5rem; }
   .gate-title { margin-bottom: 0.4rem; font-size: 1.6rem; }
   .ticker, .gate-foot, .live { display: none; }
-  /* one column: plan, billing, company, payments, password */
-  .dash-grid, .dash-grid .col { display: flex; flex-direction: column; }
+  /* one column per tab, cards in page order */
+  .dash-grid, .dash-grid .col { display: flex; flex-direction: column; align-items: stretch; }
   .dash-grid .col { display: contents; }
-  .card-status { order: 1; } .card-billing { order: 2; } .card-profile { order: 3; } .card-payments { order: 4; } .card-security { order: 5; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
 }
 @media (max-width: 560px) {
   .fields { grid-template-columns: minmax(0, 1fr); }
   .gate-form { padding: 1.6rem 1.25rem 2rem; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ticker li, .dash, .gate-title span, .live, .live i, .gate-art::before, .gate-art::after { animation: none; }
+  .ticker li, .dash, .gate-title span, .live, .live i, .gate-art::before, .gate-art::after, .tab-panel, .ov-live .dot { animation: none; }
+  .stack span { transition: none; }
 }

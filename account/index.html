@@ -218,8 +218,36 @@
 
       <p class="banner" id="d-banner" role="status" hidden></p>
 
-      <div class="dash-grid">
-        <div class="col">
+      <nav class="tabs" role="tablist" aria-label="Account sections">
+        <button type="button" role="tab" data-tab="overview" aria-selected="true">Overview</button>
+        <button type="button" role="tab" data-tab="billing" aria-selected="false">Billing</button>
+        <button type="button" role="tab" data-tab="account" aria-selected="false">Account</button>
+      </nav>
+
+      <!-- Overview: today's calling, live -->
+      <div class="tab-panel" data-panel="overview" role="tabpanel">
+        <div class="ov-head">
+          <p class="ov-live" id="ov-live"><span class="dot" aria-hidden="true"></span><span id="ov-updated">Loading…</span></p>
+          <div class="ov-date">
+            <button type="button" id="ov-prev" aria-label="Previous day">‹</button>
+            <input type="date" id="ov-date" aria-label="Day">
+            <button type="button" id="ov-next" aria-label="Next day">›</button>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><span>Calls</span><b id="s-calls">–</b></div>
+          <div class="stat"><span>Interested</span><b id="s-int">–</b></div>
+          <div class="stat"><span>Callbacks</span><b id="s-cb">–</b></div>
+          <div class="stat"><span>Average call</span><b id="s-avg">–</b></div>
+        </div>
+        <div class="dash-grid">
+          <div class="col">
+          <article class="card card-results">
+            <h2>Results</h2>
+            <div class="stack" id="ov-stack" aria-hidden="true"></div>
+            <ul class="legend" id="ov-legend"></ul>
+            <p class="muted" id="ov-empty" hidden>No calls logged for this day yet.</p>
+          </article>
         <!-- Plan & status -->
         <article class="card card-status">
           <h2>Plan</h2>
@@ -233,83 +261,113 @@
             <div><dt>Customer since</dt><dd id="d-since"></dd></div>
           </dl>
         </article>
-        <!-- Company profile -->
-        <article class="card card-profile">
-          <h2>Company</h2>
-          <dl class="kv">
-            <div id="p-phone-row"><dt>Phone</dt><dd id="p-phone"></dd></div>
-            <div id="p-city-row"><dt>City</dt><dd id="p-city"></dd></div>
-            <div id="p-team-row"><dt>Team size</dt><dd id="p-team"></dd></div>
-            <div id="p-gst-row"><dt>GST number</dt><dd id="p-gst"></dd></div>
-          </dl>
-          <p class="fine">To change these, message us on <a href="https://wa.me/917898131225" target="_blank" rel="noopener">WhatsApp</a>.</p>
-        </article>
-        <!-- Payments -->
-        <article class="card card-payments">
-          <h2>Payments</h2>
-          <ul class="pay-list" id="pay-list"></ul>
-          <p class="muted" id="pay-empty">No payments yet.</p>
-        </article>
-        </div>
-        <div class="col">
-        <!-- Billing -->
-        <article class="card card-billing" id="billing">
-          <!-- choose a plan, pay or renew -->
-          <div id="b-pick" hidden>
-            <h2 id="b-title">Choose your plan</h2>
-            <div class="seg" role="group" aria-label="Billing period">
-              <button type="button" class="is-on" data-interval="MONTH" aria-pressed="true">Monthly</button>
-              <button type="button" data-interval="YEAR" aria-pressed="false">Yearly <span class="save">2 months free</span></button>
-            </div>
-            <div class="plan-opts" role="radiogroup" aria-label="Plan">
-              <label class="plan-opt"><input type="radio" name="b-plan" value="STARTER"><span><b>Starter</b><small>10 callers · calling and Google Sheets</small></span><em data-price="STARTER"></em></label>
-              <label class="plan-opt"><input type="radio" name="b-plan" value="PRO" checked><span><b>Pro</b><small>12 callers · plus WhatsApp on your number</small></span><em data-price="PRO"></em></label>
-            </div>
-            <div class="packs">
-              <span><b>Extra callers</b><small id="b-pack-price"></small></span>
-              <div class="stepper">
-                <button type="button" id="b-minus" aria-label="Fewer extra callers">−</button>
-                <output id="b-extra" aria-live="polite">+0</output>
-                <button type="button" id="b-plus" aria-label="More extra callers">+</button>
-              </div>
-            </div>
-            <div class="total"><span>Total <small id="b-callers"></small></span><b id="b-total"></b></div>
-            <p class="discount" id="b-discount" hidden></p>
-            <div class="fields contact" id="b-contact" hidden>
-              <div class="field" id="b-email-field">
-                <label for="b-email">Email for payment receipts</label>
-                <input id="b-email" type="email" autocomplete="email" autocapitalize="none">
-              </div>
-              <div class="field" id="b-phone-field">
-                <label for="b-phone">Mobile number</label>
-                <input id="b-phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="98765 43210">
-              </div>
-            </div>
-            <div class="pay-actions">
-              <button class="btn btn-primary" type="button" id="b-now"></button>
-              <a class="btn btn-primary" id="b-wa" href="https://wa.me/917898131225" target="_blank" rel="noopener" hidden>Pay on WhatsApp</a>
-            </div>
-            <p class="fine" id="b-note"></p>
-            <p class="err" id="b-error" role="alert"></p>
           </div>
-        </article>
-        <!-- Password -->
-        <article class="card card-security">
-          <h2>App password</h2>
-          <form id="change-form" novalidate>
-            <div class="field">
-              <label for="new-pass">New password</label>
-              <div class="pw">
-                <input id="new-pass" name="password" type="password" required minlength="8" autocomplete="new-password">
-                <button type="button" aria-pressed="false" aria-label="Show password">Show</button>
-              </div>
-              <span class="hint">At least 8 characters. Logs you out of the app on every phone.</span>
+          <div class="col">
+          <article class="card card-board">
+            <h2>Callers</h2>
+            <div class="board-wrap">
+              <table class="board">
+                <thead><tr><th scope="col">Caller</th><th scope="col">Calls</th><th scope="col">Interested</th><th scope="col">Average</th></tr></thead>
+                <tbody id="ov-board"></tbody>
+              </table>
             </div>
-            <button class="btn btn-ghost" type="submit">Change password</button>
-          </form>
-          <p class="ok" id="change-ok" role="status"></p>
-          <p class="err" id="change-error" role="alert"></p>
-        </article>
+            <p class="muted" id="ov-board-empty" hidden>No callers yet. Add them in the CallerCRM app.</p>
+          </article>
+          </div>
+        </div>
+        <p class="fine">Counts the leads given out on that day, same as the app. Updates every minute.</p>
+      </div>
+
+      <div class="tab-panel" data-panel="billing" role="tabpanel" hidden>
+        <div class="dash-grid">
+          <div class="col">
+          <!-- Billing -->
+          <article class="card card-billing" id="billing">
+            <!-- choose a plan, pay or renew -->
+            <div id="b-pick" hidden>
+              <h2 id="b-title">Choose your plan</h2>
+              <div class="seg" role="group" aria-label="Billing period">
+                <button type="button" class="is-on" data-interval="MONTH" aria-pressed="true">Monthly</button>
+                <button type="button" data-interval="YEAR" aria-pressed="false">Yearly <span class="save">2 months free</span></button>
+              </div>
+              <div class="plan-opts" role="radiogroup" aria-label="Plan">
+                <label class="plan-opt"><input type="radio" name="b-plan" value="STARTER"><span><b>Starter</b><small>10 callers · calling and Google Sheets</small></span><em data-price="STARTER"></em></label>
+                <label class="plan-opt"><input type="radio" name="b-plan" value="PRO" checked><span><b>Pro</b><small>12 callers · plus WhatsApp on your number</small></span><em data-price="PRO"></em></label>
+              </div>
+              <div class="packs">
+                <span><b>Extra callers</b><small id="b-pack-price"></small></span>
+                <div class="stepper">
+                  <button type="button" id="b-minus" aria-label="Fewer extra callers">−</button>
+                  <output id="b-extra" aria-live="polite">+0</output>
+                  <button type="button" id="b-plus" aria-label="More extra callers">+</button>
+                </div>
+              </div>
+              <div class="total"><span>Total <small id="b-callers"></small></span><b id="b-total"></b></div>
+              <p class="discount" id="b-discount" hidden></p>
+              <div class="fields contact" id="b-contact" hidden>
+                <div class="field" id="b-email-field">
+                  <label for="b-email">Email for payment receipts</label>
+                  <input id="b-email" type="email" autocomplete="email" autocapitalize="none">
+                </div>
+                <div class="field" id="b-phone-field">
+                  <label for="b-phone">Mobile number</label>
+                  <input id="b-phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="98765 43210">
+                </div>
+              </div>
+              <div class="pay-actions">
+                <button class="btn btn-primary" type="button" id="b-now"></button>
+                <a class="btn btn-primary" id="b-wa" href="https://wa.me/917898131225" target="_blank" rel="noopener" hidden>Pay on WhatsApp</a>
+              </div>
+              <p class="fine" id="b-note"></p>
+              <p class="err" id="b-error" role="alert"></p>
+            </div>
+          </article>
+          </div>
+          <div class="col">
+          <!-- Payments -->
+          <article class="card card-payments">
+            <h2>Payments</h2>
+            <ul class="pay-list" id="pay-list"></ul>
+            <p class="muted" id="pay-empty">No payments yet.</p>
+          </article>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="account" role="tabpanel" hidden>
+        <div class="dash-grid">
+          <div class="col">
+          <!-- Company profile -->
+          <article class="card card-profile">
+            <h2>Company</h2>
+            <dl class="kv">
+              <div id="p-phone-row"><dt>Phone</dt><dd id="p-phone"></dd></div>
+              <div id="p-city-row"><dt>City</dt><dd id="p-city"></dd></div>
+              <div id="p-team-row"><dt>Team size</dt><dd id="p-team"></dd></div>
+              <div id="p-gst-row"><dt>GST number</dt><dd id="p-gst"></dd></div>
+            </dl>
+            <p class="fine">To change these, message us on <a href="https://wa.me/917898131225" target="_blank" rel="noopener">WhatsApp</a>.</p>
+          </article>
+          </div>
+          <div class="col">
+          <!-- Password -->
+          <article class="card card-security">
+            <h2>App password</h2>
+            <form id="change-form" novalidate>
+              <div class="field">
+                <label for="new-pass">New password</label>
+                <div class="pw">
+                  <input id="new-pass" name="password" type="password" required minlength="8" autocomplete="new-password">
+                  <button type="button" aria-pressed="false" aria-label="Show password">Show</button>
+                </div>
+                <span class="hint">At least 8 characters. Logs you out of the app on every phone.</span>
+              </div>
+              <button class="btn btn-ghost" type="submit">Change password</button>
+            </form>
+            <p class="ok" id="change-ok" role="status"></p>
+            <p class="err" id="change-error" role="alert"></p>
+          </article>
+          </div>
         </div>
       </div>
     </section>

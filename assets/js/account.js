@@ -4,6 +4,7 @@
 // decides what to show.
 const API = "https://api.callercrm.codebyakshay.com/api/signup";
 const BILLING_API = "https://api.callercrm.codebyakshay.com/api/billing";
+const ANALYTICS_API = "https://api.callercrm.codebyakshay.com/api/analytics/website";
 const GOOGLE_CLIENT_ID = "372828342832-3vjdli3p8fe7bk2kj013c5sohcdqv21g.apps.googleusercontent.com";
 const PLAY_URL = "https://play.google.com/store/apps/details?id=com.codebyakshay.callercrm";
 const WHATSAPP = "917898131225";
@@ -506,9 +507,90 @@ function renderDashboard(justSignedUp) {
     banner.hidden = false;
     banner.innerHTML = `Your 14-day free trial has started. <a href="${PLAY_URL}" target="_blank" rel="noopener">Install the app</a>, log in, and add your callers.`;
   }
-  if (d.awaitingPayment || (wantedPlan && !$("#b-pick").hidden)) {
-    setTimeout(() => $("#billing").scrollIntoView({ behavior: "smooth", block: "start" }), 250);
+  // Live overview once we've approved them; before that (or when they came to buy a plan), billing.
+  const live = !d.pendingApproval && !d.awaitingPayment && !d.suspended;
+  $('[data-tab="overview"]').hidden = !live;
+  showTab(!live || wantedPlan ? "billing" : "overview");
+}
+
+// ── Tabs ────────────────────────────────────────────────────────────────
+function showTab(name) {
+  $$("[data-tab]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
+  $$("[data-panel]").forEach((p) => (p.hidden = p.dataset.panel !== name));
+  if (name === "overview") loadOverview();
+}
+
+// ── Overview: the day's calling, like the app's analytics ───────────────
+const CALL_RESULTS = [
+  ["Interested", "Interested", "o-int"],
+  ["Callback", "Callback", "o-cb"],
+  ["Not Interested", "Not interested", "o-no"],
+  ["Called", "Called, no result", "o-called"],
+];
+const clock = (sec) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+let overviewSeq = 0;
+
+async function loadOverview() {
+  const today = dayKey(new Date());
+  const input = $("#ov-date");
+  if (!input.value) input.value = today;
+  input.max = today;
+  $("#ov-next").disabled = input.value >= today;
+  const seq = ++overviewSeq; // a slow answer for an older day mustn't overwrite a newer one
+  const { ok, status, data } = await post(ANALYTICS_API, { ...auth, date: input.value });
+  if (seq !== overviewSeq) return;
+  if (!ok) {
+    if (status === 401) { forgetAll(); return show("login", data.error); }
+    $("#ov-updated").textContent = "Couldn't load the numbers. Trying again in a minute.";
+    return;
   }
+  const isToday = input.value === today;
+  $("#ov-live").classList.toggle("is-past", !isToday);
+  $("#ov-updated").textContent = isToday
+    ? `Live · updated ${new Date().toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" })}`
+    : niceDay(input.value);
+
+  const dist = data.outcomeDistribution || {};
+  const total = data.totalCalls || 0;
+  $("#s-calls").textContent = total.toLocaleString("en-IN");
+  $("#s-int").textContent = (dist.Interested || 0).toLocaleString("en-IN");
+  $("#s-cb").textContent = (dist.Callback || 0).toLocaleString("en-IN");
+  $("#s-avg").textContent = total ? clock(data.avgDuration || 0) : "–";
+
+  const known = CALL_RESULTS.map(([key]) => key);
+  const rows = [
+    ...CALL_RESULTS.map(([key, label, cls]) => [label, dist[key] || 0, cls]),
+    ["Other", Object.entries(dist).filter(([k]) => !known.includes(k)).reduce((n, [, v]) => n + v, 0), "o-other"],
+  ].filter(([, n], i) => n > 0 || i < CALL_RESULTS.length);
+  $("#ov-empty").hidden = total > 0;
+  $("#ov-stack").innerHTML = total ? rows.filter(([, n]) => n).map(([, n, cls]) => `<span class="${cls}" style="flex-grow:${n}"></span>`).join("") : "";
+  $("#ov-legend").innerHTML = total
+    ? rows.map(([label, n, cls]) => `<li><i class="${cls}"></i>${label}<b>${n.toLocaleString("en-IN")}</b><small>${Math.round((n / total) * 100)}%</small></li>`).join("")
+    : "";
+
+  const board = data.leaderboard || [];
+  $("#ov-board-empty").hidden = board.length > 0;
+  $("#ov-board").innerHTML = board
+    .map((a) => `<tr class="${a.callsCount ? "" : "idle"}"><td>${esc(a.name)}${a.name !== a.username ? `<small>${esc(a.username)}</small>` : ""}</td><td>${a.callsCount}</td><td>${a.interestedCount}</td><td>${a.callsCount ? clock(a.avgCallDuration) : "–"}</td></tr>`)
+    .join("");
+}
+
+function initOverview() {
+  $$("[data-tab]").forEach((b) => b.addEventListener("click", () => showTab(b.dataset.tab)));
+  const input = $("#ov-date");
+  const step = (n) => {
+    input.value = addDaysKey(input.value || dayKey(new Date()), n);
+    loadOverview();
+  };
+  $("#ov-prev").addEventListener("click", () => step(-1));
+  $("#ov-next").addEventListener("click", () => step(1));
+  input.addEventListener("change", () => input.value && loadOverview());
+  // Live: refresh today's numbers every minute while the page is open and on screen.
+  setInterval(() => {
+    const onToday = !$('[data-panel="overview"]').hidden && input.value === dayKey(new Date());
+    if (auth && !document.hidden && onToday) loadOverview();
+  }, 60_000);
 }
 
 // ── Billing ─────────────────────────────────────────────────────────────
@@ -642,6 +724,7 @@ function renderPayments() {
 
 function initDashboard() {
   initBilling();
+  initOverview();
   $("#logout").addEventListener("click", () => {
     auth = null;
     account = null;
