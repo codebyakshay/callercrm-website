@@ -35,9 +35,10 @@ async function post(url, body) {
 }
 
 function busy(btn, on, label) {
-  if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+  if (!btn.dataset.label) btn.dataset.label = btn.innerHTML;
   btn.disabled = on;
-  btn.textContent = on ? label : btn.dataset.label;
+  if (on) btn.textContent = label;
+  else btn.innerHTML = btn.dataset.label;
 }
 
 // ── Remembered login (this tab only) ────────────────────────────────────
@@ -197,6 +198,7 @@ function initSignup() {
       credential: google,
       companyName: f.get("companyName"), name: f.get("name"), phone: f.get("phone"), city: f.get("city"),
       teamSize: f.get("teamSize"), gstNumber: f.get("gstNumber"), username: f.get("username"), password: f.get("password"),
+      plan: wantedPlan, // Starter/Pro: no trial, the app unlocks after the first payment
     });
     busy(btn, false);
     if (!ok) {
@@ -262,7 +264,7 @@ function renderDashboard(justSignedUp) {
   $("#dash").hidden = false;
   window.scrollTo({ top: 0 });
 
-  $("#d-plan").textContent = PLAN_LABEL[d.plan] || d.plan;
+  $("#d-plan").textContent = d.awaitingPayment ? `${PRICES[d.plan]?.name ?? d.plan} · awaiting payment` : PLAN_LABEL[d.plan] || d.plan;
   $("#d-company").textContent = d.company;
   $("#d-who").textContent = d.email || d.username;
 
@@ -271,6 +273,9 @@ function renderDashboard(justSignedUp) {
   if (d.suspended) {
     st.classList.add("bad");
     st.textContent = "This account is suspended. Message us on WhatsApp.";
+  } else if (d.awaitingPayment) {
+    st.classList.add("warn");
+    st.textContent = "Not active yet. The app unlocks as soon as your first payment goes through.";
   } else if (d.notice) {
     st.classList.add(d.notice.tone === "bad" ? "bad" : "warn");
     st.textContent = `${d.notice.title}. ${d.notice.text}`;
@@ -302,14 +307,14 @@ function renderDashboard(justSignedUp) {
     banner.textContent = d.subscription
       ? "Payment set up. You're all set."
       : "Thanks! If you approved the payment, it can take a minute to show here. Reload in a minute.";
-  } else if (justSignedUp && wantedPlan) {
+  } else if (d.awaitingPayment) {
     banner.hidden = false;
-    banner.textContent = `Your company is ready. Pay below to start ${PRICES[wantedPlan].name} today, then add your callers in the app.`;
+    banner.textContent = `${justSignedUp ? "Your company is created. " : ""}Pay below to start ${PRICES[d.plan]?.name ?? "your plan"}. You can log in to the app as soon as the payment goes through.`;
   } else if (justSignedUp) {
     banner.hidden = false;
     banner.innerHTML = `Your 14-day free trial has started. <a href="${PLAY_URL}" target="_blank" rel="noopener">Install the app</a>, log in, and add your callers.`;
   }
-  if ((justSignedUp && wantedPlan) || (wantedPlan && !$("#b-pick").hidden)) {
+  if (d.awaitingPayment || (wantedPlan && !$("#b-pick").hidden)) {
     setTimeout(() => $("#billing").scrollIntoView({ behavior: "smooth", block: "start" }), 250);
   }
 }
@@ -345,6 +350,7 @@ function renderBilling() {
     $("#b-next").textContent = niceDay(next);
     return;
   }
+  if (d.awaitingPayment && !wantedPlan) bill.plan = d.plan;
   $("#b-title").textContent = d.plan === "TRIAL" ? "Choose your plan" : "Pay for your plan";
   $(`input[name="b-plan"][value="${bill.plan}"]`).checked = true;
   $("#b-contact").hidden = !d.paymentsOpen || !(d.needEmail || d.needPhone);
@@ -376,14 +382,14 @@ function drawPicker() {
   $("#b-discount").textContent = `Founding customer price: ${bill.discount}% off, for as long as you stay.`;
 
   // Which ways to pay: now (plan starts today), and/or when the trial / paid period ends.
-  const later = deferral();
+  const later = d.awaitingPayment ? null : deferral(); // picked a plan at sign-up: no trial to wait for
   const trial = d.plan === "TRIAL";
   const nowBtn = $("#b-now");
   const laterBtn = $("#b-later");
   nowBtn.hidden = !d.paymentsOpen || (!trial && Boolean(later));
   laterBtn.hidden = !d.paymentsOpen || !later;
   $("#b-wa").hidden = d.paymentsOpen;
-  nowBtn.textContent = trial ? `Start ${p.name} now · pay ${rupees(total)}` : `Pay ${rupees(total)} and continue`;
+  nowBtn.textContent = trial ? `Start ${p.name} now · pay ${rupees(total)}` : d.awaitingPayment ? `Pay ${rupees(total)} and start ${p.name}` : `Pay ${rupees(total)} and continue`;
   nowBtn.dataset.label = nowBtn.textContent;
   laterBtn.textContent = trial ? `Pay when my trial ends (${niceDay(later || dayKey(new Date()))})` : `Renew automatically from ${niceDay(later || dayKey(new Date()))}`;
   laterBtn.dataset.label = laterBtn.textContent;
@@ -555,7 +561,10 @@ function initSignupCopy() {
   const p = PRICES[wantedPlan];
   $("#signup-title").textContent = `Get ${p.name}`;
   $("#signup-lead").textContent = `Create your company, then pay ${rupees(p.base)}/month and start today. No trial needed.`;
-  $("#signup-submit").textContent = "Create my company and continue to payment";
+  $("#plan-choice").innerHTML = `<b>${p.name} plan</b> · ${rupees(p.base)}/month · ${p.seats} callers. You'll pay on the next step.`;
+  const submit = $("#signup-submit");
+  submit.innerHTML = `<svg aria-hidden="true"><use href="/assets/img/icons.svg#card"/></svg>Verify and continue to pay`;
+  submit.dataset.label = submit.innerHTML;
 }
 
 const fontIn = Promise.all(["400 1em 'Plus Jakarta Sans'", "800 1em 'Plus Jakarta Sans'"].map((f) => document.fonts.load(f)));

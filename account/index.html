@@ -80,12 +80,14 @@
           <div class="google-slot" data-google></div>
           <p class="err" data-error role="alert"></p>
           <p class="fine">We use your Google account to confirm your email and to let you reset your password. You'll set an app password next.</p>
+          <p class="fine">No Google account? <a href="https://wa.me/917898131225?text=Hi%2C%20I%27d%20like%20to%20start%20using%20CallerCRM%20but%20I%20don%27t%20have%20a%20Google%20account." target="_blank" rel="noopener">Message us on WhatsApp</a> and we'll set you up.</p>
           <p class="switch">Already have an account? <button type="button" class="link-btn" data-go="login">Log in</button></p>
         </div>
 
         <!-- Sign up: company details -->
         <div class="step" data-step="details" hidden>
           <h1>About your company</h1>
+          <p class="plan-choice" id="plan-choice"><b>Free trial</b> · 14 days of every Pro feature, up to 12 callers. No card needed.</p>
           <p class="who">Signed in as <b data-who></b> · <button type="button" class="link-btn" data-go="signup">Use another account</button></p>
           <form id="signup-form" novalidate>
             <div class="fields">
@@ -135,7 +137,7 @@
               </div>
             </div>
             <label class="agree"><input type="checkbox" name="agree" required> <span>I agree to the <a href="/terms/" target="_blank">Terms of Service</a> and <a href="/privacy/" target="_blank">Privacy Policy</a>.</span></label>
-            <button class="btn btn-primary" type="submit" id="signup-submit">Create my company</button>
+            <button class="btn btn-primary" type="submit" id="signup-submit">Start my free trial</button>
           </form>
           <p class="err" data-error role="alert"></p>
         </div>
