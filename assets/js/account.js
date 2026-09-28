@@ -530,6 +530,25 @@ const CALL_RESULTS = [
 const clock = (sec) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
 const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 let overviewSeq = 0;
+const PAGE = 10;
+let board = [];
+let boardPage = 0;
+
+function drawBoard() {
+  const pages = Math.max(1, Math.ceil(board.length / PAGE));
+  boardPage = Math.min(boardPage, pages - 1);
+  const from = boardPage * PAGE;
+  const tags = (a) =>
+    (a.isDisabled ? '<span class="tag tag-off">Disabled</span>' : "") + (a.isTrainee ? '<span class="tag tag-trainee">Trainee</span>' : "");
+  $("#ov-board").innerHTML = board
+    .slice(from, from + PAGE)
+    .map((a) => `<tr class="${a.callsCount ? "" : "idle"}"><td>${esc(a.name)}${tags(a)}${a.name !== a.username ? `<small>${esc(a.username)}</small>` : ""}</td><td>${a.callsCount}</td><td>${a.interestedCount}</td><td>${a.callsCount ? clock(a.avgCallDuration) : "–"}</td></tr>`)
+    .join("");
+  $("#ov-pager").hidden = pages < 2;
+  $("#ov-page-info").textContent = `${from + 1}–${Math.min(from + PAGE, board.length)} of ${board.length}`;
+  $("#ov-page-prev").disabled = boardPage === 0;
+  $("#ov-page-next").disabled = boardPage >= pages - 1;
+}
 
 async function loadOverview() {
   const today = dayKey(new Date());
@@ -569,11 +588,9 @@ async function loadOverview() {
     ? rows.map(([label, n, cls]) => `<li><i class="${cls}"></i>${label}<b>${n.toLocaleString("en-IN")}</b><small>${Math.round((n / total) * 100)}%</small></li>`).join("")
     : "";
 
-  const board = data.leaderboard || [];
+  board = data.leaderboard || [];
   $("#ov-board-empty").hidden = board.length > 0;
-  $("#ov-board").innerHTML = board
-    .map((a) => `<tr class="${a.callsCount ? "" : "idle"}"><td>${esc(a.name)}${a.name !== a.username ? `<small>${esc(a.username)}</small>` : ""}</td><td>${a.callsCount}</td><td>${a.interestedCount}</td><td>${a.callsCount ? clock(a.avgCallDuration) : "–"}</td></tr>`)
-    .join("");
+  drawBoard(); // keeps the page they're on across the minute refresh
 }
 
 function initOverview() {
@@ -581,11 +598,14 @@ function initOverview() {
   const input = $("#ov-date");
   const step = (n) => {
     input.value = addDaysKey(input.value || dayKey(new Date()), n);
+    boardPage = 0;
     loadOverview();
   };
+  $("#ov-page-prev").addEventListener("click", () => { boardPage--; drawBoard(); });
+  $("#ov-page-next").addEventListener("click", () => { boardPage++; drawBoard(); });
   $("#ov-prev").addEventListener("click", () => step(-1));
   $("#ov-next").addEventListener("click", () => step(1));
-  input.addEventListener("change", () => input.value && loadOverview());
+  input.addEventListener("change", () => { if (input.value) { boardPage = 0; loadOverview(); } });
   // Live: refresh today's numbers every minute while the page is open and on screen.
   setInterval(() => {
     const onToday = !$('[data-panel="overview"]').hidden && input.value === dayKey(new Date());

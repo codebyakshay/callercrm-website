@@ -17,9 +17,9 @@
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/base.css">
   <link rel="stylesheet" href="/assets/css/components.css">
-  <link rel="stylesheet" href="/assets/css/account.css?v=20260928b">
+  <link rel="stylesheet" href="/assets/css/account.css?v=20260928c">
 
-  <script src="/assets/js/account.js?v=20260928b" defer></script>
+  <script src="/assets/js/account.js?v=20260928c" defer></script>
   <script src="https://accounts.google.com/gsi/client" async></script>
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js" defer></script>
 </head>
@@ -272,6 +272,11 @@
               </table>
             </div>
             <p class="muted" id="ov-board-empty" hidden>No callers yet. Add them in the CallerCRM app.</p>
+            <div class="pager" id="ov-pager" hidden>
+              <button type="button" id="ov-page-prev" aria-label="Previous callers">‹</button>
+              <span id="ov-page-info" aria-live="polite"></span>
+              <button type="button" id="ov-page-next" aria-label="More callers">›</button>
+            </div>
           </article>
           </div>
         </div>

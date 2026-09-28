@@ -287,6 +287,13 @@ form .btn, .pay-actions .btn { width: 100%; }
 .board td:first-child { font-weight: 700; }
 .board td:first-child small { display: block; font-weight: 500; color: var(--muted); font-size: var(--fs-xs); }
 .board tr.idle td { color: var(--muted); }
+.tag { display: inline-block; vertical-align: 2px; margin-left: 0.4rem; padding: 1px 7px; border-radius: 999px; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.02em; }
+.tag-trainee { background: #fff4db; color: #8a5a00; }
+.tag-off { background: #fdecef; color: #9b2335; }
+.pager { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; margin-top: 0.9rem; font-size: var(--fs-sm); color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.pager button { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft); font-size: 1.05rem; }
+.pager button:hover:not(:disabled) { background: var(--bg-soft); }
+.pager button:disabled { opacity: 0.35; }
 
 /* ── Small screens ────────────────────────────────────── */
 @media (max-width: 880px) {
