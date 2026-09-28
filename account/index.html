@@ -17,9 +17,9 @@
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/base.css">
   <link rel="stylesheet" href="/assets/css/components.css">
-  <link rel="stylesheet" href="/assets/css/account.css?v=20260929a">
+  <link rel="stylesheet" href="/assets/css/account.css?v=20260929b">
 
-  <script src="/assets/js/account.js?v=20260929a" defer></script>
+  <script src="/assets/js/account.js?v=20260929b" defer></script>
   <script src="https://accounts.google.com/gsi/client" async></script>
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js" defer></script>
 </head>
@@ -284,7 +284,7 @@
       </div>
 
       <div class="tab-panel" data-panel="billing" role="tabpanel" hidden>
-        <div class="dash-grid">
+        <div class="dash-grid even">
           <div class="col">
           <!-- Billing -->
           <article class="card card-billing" id="billing">
@@ -336,8 +336,12 @@
           <!-- Payments -->
           <article class="card card-payments">
             <h2>Payments</h2>
+            <div class="pay-sum" id="pay-sum"></div>
             <ul class="pay-list" id="pay-list"></ul>
-            <p class="muted" id="pay-empty">No payments yet.</p>
+            <div class="pay-empty" id="pay-empty">
+              <svg aria-hidden="true"><use href="/assets/img/icons.svg#card"/></svg>
+              <p>No payments yet. Every payment shows here with what it bought.</p>
+            </div>
           </article>
           </div>
         </div>

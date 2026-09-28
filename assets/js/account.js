@@ -758,15 +758,24 @@ function initBilling() {
 }
 
 function renderPayments() {
-  const list = account.payments || [];
+  const d = account;
+  const list = d.payments || [];
   $("#pay-empty").hidden = list.length > 0;
-  $("#pay-list").replaceChildren(
-    ...list.map((p) => {
-      const li = document.createElement("li");
-      li.innerHTML = `<span>${niceDay(p.paidOn)}</span><span><b>${rupees(p.amount)}</b> · to ${niceDay(p.coversUntil)}</span>`;
-      return li;
-    }),
-  );
+  $("#pay-list").hidden = list.length === 0;
+  const until = d.paidUntil ? niceDay(d.paidUntil) : "—";
+  $("#pay-sum").innerHTML =
+    `<div><small>${d.plan === "TRIAL" ? "Trial ends" : "Paid until"}</small><b>${until}</b></div>` +
+    `<div><small>Paid so far</small><b>${rupees(list.reduce((n, p) => n + p.amount, 0))}</b></div>`;
+  $("#pay-list").innerHTML = list
+    .map((p) => {
+      const what = p.plan && PRICES[p.plan]
+        ? `${PRICES[p.plan].name} · 1 ${p.interval === "YEAR" ? "year" : "month"}${p.extraPacks ? ` · +${p.extraPacks * 5} callers` : ""}`
+        : "Payment";
+      return `<li><span class="ic"><svg aria-hidden="true"><use href="/assets/img/icons.svg#check"/></svg></span>` +
+        `<b>${what}</b><span class="amt">${rupees(p.amount)}</span>` +
+        `<small>${niceDay(p.paidOn)} · <span class="nw">ID ${esc(p.id)}</span></small><small class="to">Covers to ${niceDay(p.coversUntil)}</small></li>`;
+    })
+    .join("");
 }
 
 function initDashboard() {
