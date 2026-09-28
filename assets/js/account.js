@@ -4,7 +4,7 @@
 // decides what to show.
 const API = "https://api.callercrm.codebyakshay.com/api/signup";
 const BILLING_API = "https://api.callercrm.codebyakshay.com/api/billing";
-const GOOGLE_CLIENT_ID = "135149357843-kh5reev4cvesdos3p1uvsq2b044edrdd.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = "372828342832-3vjdli3p8fe7bk2kj013c5sohcdqv21g.apps.googleusercontent.com";
 const PLAY_URL = "https://play.google.com/store/apps/details?id=com.codebyakshay.callercrm";
 const WHATSAPP = "917898131225";
 // Same as the pricing section and the server (src/lib/pricing.ts). The server sets the real amount.
