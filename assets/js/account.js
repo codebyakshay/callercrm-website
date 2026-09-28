@@ -558,6 +558,8 @@ function initSignupCopy() {
   $("#signup-submit").textContent = "Create my company and continue to payment";
 }
 
+const fontIn = Promise.all(["400 1em 'Plus Jakarta Sans'", "800 1em 'Plus Jakarta Sans'"].map((f) => document.fonts.load(f)));
+Promise.race([fontIn, new Promise((r) => setTimeout(r, 800))]).finally(() => document.documentElement.classList.add("ready"));
 initPasswordToggles();
 initPasswordLogin();
 initSignup();

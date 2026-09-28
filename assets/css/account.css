@@ -49,6 +49,11 @@ body {
 @keyframes grid-pan { to { background-position: 44px 44px; } }
 @keyframes drift { to { transform: translate(-110px, -140px) scale(1.2); } }
 .gate-art > * { position: relative; z-index: 1; }
+/* Hold the card's content until the font is in (account.js adds .ready, 0.8 s at most),
+   so text never re-wraps in front of you; the entrance animations wait for it too. */
+.gate-art > *, .gate-form { transition: opacity 0.35s var(--ease); }
+html:not(.ready) :is(.gate-art > *, .gate-form) { opacity: 0; }
+html:not(.ready) .gate * { animation-play-state: paused; }
 .gate-kicker { font-size: var(--fs-xs); font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--cream); }
 .gate-title { font-size: clamp(1.9rem, 1.3rem + 1.8vw, 2.6rem); line-height: 1.08; letter-spacing: -0.035em; margin: 0.9rem 0 auto; }
 .gate-title span { display: block; animation: rise 0.9s var(--ease) both; }
@@ -108,7 +113,7 @@ body {
 [data-step="details"] { width: min(100%, 520px); }
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } }
 
-.google-slot { min-height: 44px; display: flex; justify-content: center; }
+.google-slot { height: 44px; display: flex; align-items: center; justify-content: center; } /* fixed: Google's swap never moves the text */
 .google-slot > * { opacity: 0; transition: opacity 0.15s; }
 .google-slot.ready > * { opacity: 1; }
 .or { display: flex; align-items: center; gap: 0.8rem; margin: 1.3rem 0; color: var(--muted); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; }
