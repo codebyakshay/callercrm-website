@@ -87,7 +87,7 @@
         <!-- Sign up: company details -->
         <div class="step" data-step="details" hidden>
           <h1>About your company</h1>
-          <p class="plan-choice" id="plan-choice"><b>Free trial</b> · 14 days of every Pro feature, up to 12 callers. No card needed.</p>
+          <p class="plan-choice" id="plan-choice"><b>Free trial</b> · 14 days of every Pro feature, up to 12 callers, from the day we approve your company. No card needed.</p>
           <p class="who">Signed in as <b data-who></b> · <button type="button" class="link-btn" data-go="signup">Use another account</button></p>
           <form id="signup-form" novalidate>
             <div class="fields">
@@ -216,6 +216,11 @@
         <div class="col">
         <!-- Billing -->
         <article class="card card-billing" id="billing">
+          <!-- website sign-up we haven't approved yet -->
+          <div id="b-pending" hidden>
+            <h2 id="b-pending-title">Payment</h2>
+            <p class="muted">You can pay here as soon as your company is approved. We check every new company by hand, usually within a few hours.</p>
+          </div>
           <!-- automatic payments on -->
           <div id="b-active" hidden>
             <h2>Automatic payments</h2>

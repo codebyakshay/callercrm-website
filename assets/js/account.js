@@ -264,7 +264,7 @@ function renderDashboard(justSignedUp) {
   $("#dash").hidden = false;
   window.scrollTo({ top: 0 });
 
-  $("#d-plan").textContent = d.awaitingPayment ? `${PRICES[d.plan]?.name ?? d.plan} · awaiting payment` : PLAN_LABEL[d.plan] || d.plan;
+  $("#d-plan").textContent = d.pendingApproval ? "Waiting for approval" : d.awaitingPayment ? `${PRICES[d.plan]?.name ?? d.plan} · awaiting payment` : PLAN_LABEL[d.plan] || d.plan;
   $("#d-company").textContent = d.company;
   $("#d-who").textContent = d.email || d.username;
 
@@ -273,6 +273,9 @@ function renderDashboard(justSignedUp) {
   if (d.suspended) {
     st.classList.add("bad");
     st.textContent = "This account is suspended. Message us on WhatsApp.";
+  } else if (d.pendingApproval) {
+    st.classList.add("warn");
+    st.textContent = "Waiting for approval. We check every new company by hand, usually within a few hours.";
   } else if (d.awaitingPayment) {
     st.classList.add("warn");
     st.textContent = "Not active yet. The app unlocks as soon as your first payment goes through.";
@@ -307,6 +310,12 @@ function renderDashboard(justSignedUp) {
     banner.textContent = d.subscription
       ? "Payment set up. You're all set."
       : "Thanks! If you approved the payment, it can take a minute to show here. Reload in a minute.";
+  } else if (d.pendingApproval) {
+    banner.hidden = false;
+    const then = d.awaitingPayment
+      ? `Once it's approved, pay here to start ${PRICES[d.plan]?.name ?? "your plan"} and log in to the app.`
+      : "Once it's approved, your 14-day free trial starts and you can log in to the app.";
+    banner.textContent = `${justSignedUp ? "Your company is created. " : ""}We check every new company by hand, usually within a few hours. ${then}`;
   } else if (d.awaitingPayment) {
     banner.hidden = false;
     banner.textContent = `${justSignedUp ? "Your company is created. " : ""}Pay below to start ${PRICES[d.plan]?.name ?? "your plan"}. You can log in to the app as soon as the payment goes through.`;
@@ -314,7 +323,7 @@ function renderDashboard(justSignedUp) {
     banner.hidden = false;
     banner.innerHTML = `Your 14-day free trial has started. <a href="${PLAY_URL}" target="_blank" rel="noopener">Install the app</a>, log in, and add your callers.`;
   }
-  if (d.awaitingPayment || (wantedPlan && !$("#b-pick").hidden)) {
+  if (!d.pendingApproval && (d.awaitingPayment || (wantedPlan && !$("#b-pick").hidden))) {
     setTimeout(() => $("#billing").scrollIntoView({ behavior: "smooth", block: "start" }), 250);
   }
 }
@@ -341,7 +350,8 @@ function renderBilling() {
   bill.discount = d.discountPct || 0;
   const sub = d.subscription;
   $("#b-active").hidden = !sub;
-  $("#b-pick").hidden = Boolean(sub) || d.suspended;
+  $("#b-pending").hidden = !d.pendingApproval;
+  $("#b-pick").hidden = Boolean(sub) || d.suspended || d.pendingApproval;
   if (sub) {
     const extra = sub.extraPacks ? ` + ${sub.extraPacks * 5} callers` : "";
     $("#b-active-plan").textContent = `${PRICES[sub.plan]?.name ?? sub.plan}${extra}`;
@@ -561,7 +571,7 @@ function initSignupCopy() {
   const p = PRICES[wantedPlan];
   $("#signup-title").textContent = `Get ${p.name}`;
   $("#signup-lead").textContent = `Create your company, then pay ${rupees(p.base)}/month and start today. No trial needed.`;
-  $("#plan-choice").innerHTML = `<b>${p.name} plan</b> · ${rupees(p.base)}/month · ${p.seats} callers. You'll pay on the next step.`;
+  $("#plan-choice").innerHTML = `<b>${p.name} plan</b> · ${rupees(p.base)}/month · ${p.seats} callers. We check your company, then you pay and start.`;
   const submit = $("#signup-submit");
   submit.innerHTML = `<svg aria-hidden="true"><use href="/assets/img/icons.svg#card"/></svg>Verify and continue to pay`;
   submit.dataset.label = submit.innerHTML;
