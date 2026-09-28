@@ -79,6 +79,8 @@ body {
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } }
 
 .google-slot { min-height: 44px; display: flex; justify-content: center; }
+.google-slot > * { opacity: 0; transition: opacity 0.15s; }
+.google-slot.ready > * { opacity: 1; }
 .or { display: flex; align-items: center; gap: 0.8rem; margin: 1.3rem 0; color: var(--muted); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; }
 .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 

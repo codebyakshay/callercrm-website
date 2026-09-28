@@ -103,13 +103,24 @@ function startGoogle() {
 function renderGoogleButtons() {
   onGoogleReady(() => {
     startGoogle();
-    $$("[data-google]").forEach((slot) =>
+    $$("[data-google]").forEach((slot) => {
       window.google.accounts.id.renderButton(slot, {
         theme: "outline", size: "large", shape: "pill", logo_alignment: "center", width: Math.min(340, window.innerWidth - 72),
         text: slot.closest("[data-step]").dataset.step === "signup" ? "signup_with" : "continue_with",
-      }),
-    );
+      });
+      revealWhenPersonal(slot);
+    });
   });
+}
+
+// Google draws a plain button, then swaps in "Continue as <name>" once its frame loads
+// (the frame grows from 0px). Keep the slot blank until then so the button appears once;
+// people not signed in to Google never get the frame, so show the plain one after 1.5 s.
+function revealWhenPersonal(slot) {
+  const reveal = () => slot.classList.add("ready");
+  setTimeout(reveal, 1500);
+  const frame = slot.querySelector("iframe");
+  if (frame) new ResizeObserver(() => frame.offsetHeight && reveal()).observe(frame);
 }
 
 async function onGoogle(token) {
