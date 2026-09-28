@@ -254,17 +254,7 @@
         <div class="col">
         <!-- Billing -->
         <article class="card card-billing" id="billing">
-          <!-- automatic payments on -->
-          <div id="b-active" hidden>
-            <h2>Automatic payments</h2>
-            <p class="big"><span id="b-active-plan"></span> <b id="b-active-price"></b></p>
-            <p class="muted">Next charge <b id="b-next"></b>, from your UPI or card, by itself.</p>
-            <button class="link-btn danger" type="button" id="b-cancel">Cancel automatic payments</button>
-            <p class="fine">Your plan keeps working until its end date. To change plan or callers, cancel, then choose again.</p>
-            <p class="err" id="b-cancel-error" role="alert"></p>
-          </div>
-
-          <!-- choose a plan -->
+          <!-- choose a plan, pay or renew -->
           <div id="b-pick" hidden>
             <h2 id="b-title">Choose your plan</h2>
             <div class="seg" role="group" aria-label="Billing period">
@@ -291,13 +281,12 @@
                 <input id="b-email" type="email" autocomplete="email" autocapitalize="none">
               </div>
               <div class="field" id="b-phone-field">
-                <label for="b-phone">Mobile for UPI Autopay</label>
+                <label for="b-phone">Mobile number</label>
                 <input id="b-phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="98765 43210">
               </div>
             </div>
             <div class="pay-actions">
               <button class="btn btn-primary" type="button" id="b-now"></button>
-              <button class="btn btn-ghost" type="button" id="b-later" hidden></button>
               <a class="btn btn-primary" id="b-wa" href="https://wa.me/917898131225" target="_blank" rel="noopener" hidden>Pay on WhatsApp</a>
             </div>
             <p class="fine" id="b-note"></p>

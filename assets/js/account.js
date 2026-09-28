@@ -221,7 +221,7 @@ function initSignup() {
       busy(btn, false);
       return stepError("The payment page didn't load. Check your internet, reload, and try again.");
     }
-    const result = await window.Cashfree({ mode: data.mode }).subscriptionsCheckout({ subsSessionId: data.sessionId, redirectTarget: "_self" });
+    const result = await window.Cashfree({ mode: data.mode }).checkout({ paymentSessionId: data.sessionId, redirectTarget: "_self" });
     if (result?.error) {
       busy(btn, false);
       stepError(result.error.message || "The payment page didn't open. Please try again.");
@@ -256,7 +256,7 @@ function drawCheckout() {
   $("#c-plus").disabled = co.packs === 20;
   $("#c-callers").textContent = `${p.seats + co.packs * 5} callers`;
   $("#c-total").textContent = rupees(total) + per;
-  $("#c-note").textContent = `${rupees(total)} is charged today and your plan starts now, then every ${year ? "year" : "month"} by UPI Autopay or card. Cancel any time. Secure payment by Cashfree.`;
+  $("#c-note").textContent = `${rupees(total)} is paid today and your plan starts now, for one ${year ? "year" : "month"}. No automatic charges: we remind you before it ends, and you renew here. Secure payment by Cashfree: UPI, card or netbanking.`;
   const submit = $("#signup-submit");
   submit.innerHTML = `<svg aria-hidden="true"><use href="/assets/img/icons.svg#card"/></svg>Verify and pay ${rupees(total)}`;
   submit.dataset.label = submit.innerHTML;
@@ -412,6 +412,14 @@ function initReset() {
 // ── Dashboard ───────────────────────────────────────────────────────────
 let auth = null; // { credential } or { token }: sent with every dashboard call
 let account = null;
+let orderPaid = null; // back from Cashfree's page: did that payment go through?
+
+/** Back from paying on the account page: have the server check the order with Cashfree first. */
+async function checkOrder() {
+  if (!params.has("order")) return;
+  const { data } = await post(`${BILLING_API}/confirm`, { orderId: params.get("order") });
+  orderPaid = data?.paid === true;
+}
 const bill = { plan: wantedPlan || "PRO", interval: "MONTH", packs: 0, discount: 0 };
 
 async function loadAccount(authBody, { justSignedUp = false, noCompany } = {}) {
@@ -479,11 +487,13 @@ function renderDashboard(justSignedUp) {
   const banner = $("#d-banner");
   banner.className = "banner";
   banner.hidden = true;
-  if (params.has("subscription")) {
+  if (orderPaid !== null) {
     banner.hidden = false;
-    banner.textContent = d.subscription
-      ? "Payment set up. You're all set."
-      : "Thanks! If you approved the payment, it can take a minute to show here. Reload in a minute.";
+    banner.textContent = orderPaid
+      ? `Payment received, thank you! ${d.paidUntil ? `Your plan now runs until ${niceDay(d.paidUntil)}.` : ""}`
+      : "We haven't received this payment. If money was taken, it shows here within a few minutes: reload this page, or message us on WhatsApp.";
+    orderPaid = null;
+    history.replaceState(null, "", location.pathname);
   } else if (d.awaitingPayment) {
     banner.hidden = false;
     banner.textContent = `${justSignedUp ? "Your company is created. " : ""}Pay below to start ${PRICES[d.plan]?.name ?? "your plan"}. Then we check your company, usually within a few hours, and you can log in to the app.`;
@@ -508,32 +518,32 @@ function priceOf(plan, interval, packs) {
   return Math.round((full * (100 - bill.discount)) / 100); // same rounding as the server
 }
 
-/** Mirrors the server: can the first charge wait for the trial / current period to end? */
-function deferral() {
-  const today = dayKey(new Date());
-  const paidUntil = account.paidUntil;
-  if (paidUntil && paidUntil <= today) return null;
-  const earliest = addDaysKey(today, 2);
-  const after = paidUntil ? addDaysKey(paidUntil, 1) : earliest;
-  return after > earliest ? after : earliest;
+/** "2026-01-31" + 1 month = "2026-02-28", like the server. */
+function addIntervalKey(key, interval) {
+  const [y, m, d] = key.split("-").map(Number);
+  const t = new Date(Date.UTC(y, m - 1 + (interval === "YEAR" ? 12 : 1), 1));
+  const last = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + 1, 0)).getUTCDate();
+  t.setUTCDate(Math.min(d, last));
+  return t.toISOString().slice(0, 10);
+}
+
+/** Mirrors the server: paid until after paying now. Paying early or in a trial keeps the days left. */
+function paidUntilAfterPaying(interval) {
+  const yesterday = addDaysKey(dayKey(new Date()), -1);
+  const current = account.paidUntil;
+  return addIntervalKey(current && current >= yesterday ? current : yesterday, interval);
 }
 
 function renderBilling() {
   const d = account;
   bill.discount = d.discountPct || 0;
-  const sub = d.subscription;
-  $("#b-active").hidden = !sub;
-  $("#b-pick").hidden = Boolean(sub) || d.suspended;
-  if (sub) {
-    const extra = sub.extraPacks ? ` + ${sub.extraPacks * 5} callers` : "";
-    $("#b-active-plan").textContent = `${PRICES[sub.plan]?.name ?? sub.plan}${extra}`;
-    $("#b-active-price").textContent = rupees(sub.amount) + (sub.interval === "YEAR" ? "/year" : "/month");
-    const next = d.payments.length ? addDaysKey(d.paidUntil, 1) : sub.firstChargeDay;
-    $("#b-next").textContent = niceDay(next);
-    return;
+  $("#b-pick").hidden = d.suspended;
+  // Renewing: start from what they have (plan and extra callers).
+  if (PRICES[d.plan] && !wantedPlan) {
+    bill.plan = d.plan;
+    bill.packs = Math.max(0, Math.min(20, Math.round((d.seatLimit - PRICES[d.plan].seats) / 5)));
   }
-  if (d.awaitingPayment && !wantedPlan) bill.plan = d.plan;
-  $("#b-title").textContent = d.plan === "TRIAL" ? "Choose your plan" : "Pay for your plan";
+  $("#b-title").textContent = d.plan === "TRIAL" ? "Choose your plan" : d.awaitingPayment ? "Pay for your plan" : "Renew or change plan";
   $(`input[name="b-plan"][value="${bill.plan}"]`).checked = true;
   $("#b-contact").hidden = !d.paymentsOpen || !(d.needEmail || d.needPhone);
   $("#b-email-field").hidden = !d.needEmail;
@@ -563,26 +573,18 @@ function drawPicker() {
   $("#b-discount").hidden = !bill.discount;
   $("#b-discount").textContent = `Founding customer price: ${bill.discount}% off, for as long as you stay.`;
 
-  // Which ways to pay: now (plan starts today), and/or when the trial / paid period ends.
-  // Picked a plan at sign-up, or not approved yet: no running trial to wait for, so pay now only.
-  const later = d.awaitingPayment || d.pendingApproval ? null : deferral();
+  // One payment = one month or year, added to what's left (a trial's days are kept). No automatic charges.
   const trial = d.plan === "TRIAL";
   const nowBtn = $("#b-now");
-  const laterBtn = $("#b-later");
-  nowBtn.hidden = !d.paymentsOpen || (!trial && Boolean(later));
-  laterBtn.hidden = !d.paymentsOpen || !later;
+  nowBtn.hidden = !d.paymentsOpen;
   $("#b-wa").hidden = d.paymentsOpen;
-  nowBtn.textContent = trial ? `Start ${p.name} now · pay ${rupees(total)}` : d.awaitingPayment ? `Pay ${rupees(total)} and start ${p.name}` : `Pay ${rupees(total)} and continue`;
+  nowBtn.textContent = trial ? `Start ${p.name} · pay ${rupees(total)}` : d.awaitingPayment ? `Pay ${rupees(total)} and start ${p.name}` : `Pay ${rupees(total)}`;
   nowBtn.dataset.label = nowBtn.textContent;
-  laterBtn.textContent = trial ? `Pay when my trial ends (${niceDay(later || dayKey(new Date()))})` : `Renew automatically from ${niceDay(later || dayKey(new Date()))}`;
-  laterBtn.dataset.label = laterBtn.textContent;
-  laterBtn.classList.toggle("btn-primary", nowBtn.hidden);
-  laterBtn.classList.toggle("btn-ghost", !nowBtn.hidden);
 
-  const notes = [];
-  if (!nowBtn.hidden) notes.push(`${rupees(total)} is charged today and your plan starts now. Then every ${every} on the same date.`);
-  if (!laterBtn.hidden) notes.push(`${trial ? "Pay when your trial ends" : "Automatic renewal"}: nothing today (₹1 is checked and refunded), first charge on ${niceDay(later)}.`);
-  if (d.paymentsOpen) notes.push("Secure payment by Cashfree: UPI Autopay or card. Cancel any time here.");
+  const notes = [`Pay once for one ${every}: your plan then runs until ${niceDay(paidUntilAfterPaying(bill.interval))}.`];
+  if (!trial && PRICES[d.plan] && (bill.plan !== d.plan || p.seats + bill.packs * 5 !== d.seatLimit)) notes.push("The new plan and callers start as soon as it's paid.");
+  notes.push("No automatic charges: we remind you before it ends.");
+  if (d.paymentsOpen) notes.push("Secure payment by Cashfree: UPI, card or netbanking.");
   $("#b-note").textContent = notes.join(" ");
 
   if (!d.paymentsOpen) {
@@ -591,11 +593,11 @@ function drawPicker() {
   }
 }
 
-async function subscribe(startNow, btn) {
+async function pay(btn) {
   $("#b-error").textContent = "";
   busy(btn, true, "Opening secure payment…");
-  const { ok, status, data } = await post(`${BILLING_API}/subscribe`, {
-    ...auth, plan: bill.plan, interval: bill.interval, extraPacks: bill.packs, startNow,
+  const { ok, status, data } = await post(`${BILLING_API}/pay`, {
+    ...auth, plan: bill.plan, interval: bill.interval, extraPacks: bill.packs,
     email: $("#b-email").value, phone: $("#b-phone").value,
   });
   if (!ok) {
@@ -609,7 +611,7 @@ async function subscribe(startNow, btn) {
     $("#b-error").textContent = "The payment page didn't load. Check your internet, reload, and try again.";
     return;
   }
-  const result = await window.Cashfree({ mode: data.mode }).subscriptionsCheckout({ subsSessionId: data.sessionId, redirectTarget: "_self" });
+  const result = await window.Cashfree({ mode: data.mode }).checkout({ paymentSessionId: data.sessionId, redirectTarget: "_self" });
   if (result?.error) {
     busy(btn, false);
     $("#b-error").textContent = result.error.message || "The payment page didn't open. Please try again.";
@@ -621,20 +623,7 @@ function initBilling() {
   $$('input[name="b-plan"]').forEach((r) => r.addEventListener("change", () => { bill.plan = r.value; drawPicker(); }));
   $("#b-minus").addEventListener("click", () => { bill.packs = Math.max(0, bill.packs - 1); drawPicker(); });
   $("#b-plus").addEventListener("click", () => { bill.packs = Math.min(20, bill.packs + 1); drawPicker(); });
-  $("#b-now").addEventListener("click", (e) => subscribe(true, e.currentTarget));
-  $("#b-later").addEventListener("click", (e) => subscribe(false, e.currentTarget));
-
-  $("#b-cancel").addEventListener("click", async () => {
-    if (!confirm("Stop automatic payments? Your plan keeps working until its end date, then the account turns read-only unless you pay again.")) return;
-    $("#b-cancel-error").textContent = "";
-    const { ok, status, data } = await post(`${BILLING_API}/cancel`, { ...auth });
-    if (!ok) {
-      if (status === 401) { forgetAll(); return show("login", data.error); }
-      $("#b-cancel-error").textContent = data.error || "Couldn't cancel. Please try again.";
-      return;
-    }
-    loadAccount(auth);
-  });
+  $("#b-now").addEventListener("click", (e) => pay(e.currentTarget));
 }
 
 function renderPayments() {
@@ -746,9 +735,11 @@ function initSignupCopy() {
   $("#signup-lead").textContent = `Pay ${rupees(p.base)}/month and start today. No trial needed.`;
 }
 
-/** Back from Cashfree after a Starter/Pro sign-up: the company exists once the payment webhook lands. */
-function confirmCheckout(credential, tries = 0) {
+/** Back from Cashfree after a Starter/Pro sign-up: the company exists once the payment is confirmed. */
+async function confirmCheckout(credential, tries = 0) {
   if (tries === 0) show("confirming");
+  // Ask the server to check with Cashfree now; the webhook does the same, whichever comes first.
+  await post(`${BILLING_API}/confirm`, { orderId: params.get("checkout") });
   loadAccount({ credential }, {
     justSignedUp: true,
     noCompany: () => {
@@ -784,6 +775,6 @@ const savedWeb = remembered("web");
 const savedGoogle = remembered("google");
 if (mode === "reset") show("reset");
 else if (params.has("checkout") && savedGoogle) { googleToken = savedGoogle; confirmCheckout(savedGoogle); }
-else if (savedWeb) loadAccount({ token: savedWeb });
-else if (savedGoogle) { googleToken = savedGoogle; loadAccount({ credential: savedGoogle }, { noCompany: () => onGoogleSignup(savedGoogle) }); }
+else if (savedWeb) checkOrder().then(() => loadAccount({ token: savedWeb }));
+else if (savedGoogle) { googleToken = savedGoogle; checkOrder().then(() => loadAccount({ credential: savedGoogle }, { noCompany: () => onGoogleSignup(savedGoogle) })); }
 else show(mode === "signup" || wantedPlan ? "signup" : "login");
