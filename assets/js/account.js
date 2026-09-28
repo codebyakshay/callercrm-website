@@ -538,10 +538,12 @@ function renderBilling() {
   const d = account;
   bill.discount = d.discountPct || 0;
   $("#b-pick").hidden = d.suspended;
-  // Renewing: start from what they have (plan and extra callers).
+  // Renewing: start from what they have: plan, and enough extra callers for their limit and team
+  // (no limit set = size it to the callers they have).
   if (PRICES[d.plan] && !wantedPlan) {
     bill.plan = d.plan;
-    bill.packs = Math.max(0, Math.min(20, Math.round((d.seatLimit - PRICES[d.plan].seats) / 5)));
+    const need = Math.max(d.seatLimit || 0, d.callers || 0);
+    bill.packs = Math.max(0, Math.min(20, Math.ceil((need - PRICES[d.plan].seats) / 5)));
   }
   $("#b-title").textContent = d.plan === "TRIAL" ? "Choose your plan" : d.awaitingPayment ? "Pay for your plan" : "Renew or change plan";
   $(`input[name="b-plan"][value="${bill.plan}"]`).checked = true;
