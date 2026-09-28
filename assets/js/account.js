@@ -192,22 +192,193 @@ function initSignup() {
     stepError("");
     if (!form.reportValidity()) return;
     const btn = $("#signup-submit");
-    busy(btn, true, "Creating your company…");
     const f = new FormData(form);
-    const { ok, status, data } = await post(API, {
+    const body = {
       credential: google,
-      companyName: f.get("companyName"), name: f.get("name"), phone: f.get("phone"), city: f.get("city"),
+      companyName: f.get("companyName"), name: f.get("name"), phone: f.get("phone"),
+      address: f.get("address"), city: f.get("city") || String(f.get("address")).slice(0, 100),
       teamSize: f.get("teamSize"), gstNumber: f.get("gstNumber"), username: f.get("username"), password: f.get("password"),
-      plan: wantedPlan, // Starter/Pro: no trial, the app unlocks after the first payment
-    });
-    busy(btn, false);
-    if (!ok) {
-      if (status === 401) return show("signup", data.error);
-      return stepError(data.error || "Something went wrong. Please try again.");
+    };
+    // Free trial: the company is created now (we approve it). Starter/Pro: nothing is created until
+    // they've paid; the server keeps the form while they're on Cashfree's page.
+    if (!wantedPlan) {
+      busy(btn, true, "Creating your company…");
+      const { ok, status, data } = await post(API, body);
+      busy(btn, false);
+      if (!ok) return status === 401 ? show("signup", data.error) : stepError(data.error || "Something went wrong. Please try again.");
+      form.reset();
+      return loadAccount({ credential: google }, { justSignedUp: true });
     }
-    form.reset();
-    loadAccount({ credential: google }, { justSignedUp: true });
+    busy(btn, true, "Opening secure payment…");
+    const { ok, status, data } = await post(`${API}/checkout`, { ...body, plan: co.plan, interval: co.interval, extraPacks: co.packs });
+    if (!ok) {
+      busy(btn, false);
+      if (status === 401) return show("signup", data.error);
+      if (data.code === "PAYMENTS_OFF") return paymentsOff(body);
+      return stepError(data.error || "Couldn't start the payment. Please try again.");
+    }
+    if (!window.Cashfree) {
+      busy(btn, false);
+      return stepError("The payment page didn't load. Check your internet, reload, and try again.");
+    }
+    const result = await window.Cashfree({ mode: data.mode }).subscriptionsCheckout({ subsSessionId: data.sessionId, redirectTarget: "_self" });
+    if (result?.error) {
+      busy(btn, false);
+      stepError(result.error.message || "The payment page didn't open. Please try again.");
+    }
   });
+}
+
+/** Online payment not switched on (yet): hand over to WhatsApp with what they typed. Nothing is saved. */
+function paymentsOff(body) {
+  const p = PRICES[co.plan];
+  const msg = `Hi, I'd like to buy CallerCRM ${p.name} (${co.interval === "YEAR" ? "yearly" : "monthly"}, ${p.seats + co.packs * 5} callers).\n` +
+    `Company: ${body.companyName}\nName: ${body.name}\nMobile: ${body.phone}\nAddress: ${body.address}\nEmail: ${$("[data-who]").textContent}`;
+  const el = $('[data-step="details"] [data-error]');
+  el.replaceChildren("Online payment isn't switched on yet. ");
+  const a = Object.assign(document.createElement("a"), { href: `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`, target: "_blank", rel: "noopener", textContent: "Message us on WhatsApp" });
+  el.append(a, " and we'll set you up today.");
+}
+
+// ── Sign up: plan, billing period and callers (Starter/Pro) ─────────────
+const co = { plan: wantedPlan || "PRO", interval: "MONTH", packs: 0 };
+
+function drawCheckout() {
+  const p = PRICES[co.plan];
+  const year = co.interval === "YEAR";
+  const per = year ? "/year" : "/month";
+  const total = (p.base + co.packs * p.pack) * (year ? 10 : 1);
+  $$("[data-cplan]").forEach((b) => { b.classList.toggle("is-on", b.dataset.cplan === co.plan); b.setAttribute("aria-pressed", String(b.dataset.cplan === co.plan)); });
+  $$("[data-cint]").forEach((b) => { b.classList.toggle("is-on", b.dataset.cint === co.interval); b.setAttribute("aria-pressed", String(b.dataset.cint === co.interval)); });
+  $("#c-pack-price").textContent = `Packs of 5, ${rupees(p.pack * (year ? 10 : 1))}${per} each`;
+  $("#c-extra").textContent = `+${co.packs * 5}`;
+  $("#c-minus").disabled = co.packs === 0;
+  $("#c-plus").disabled = co.packs === 20;
+  $("#c-callers").textContent = `${p.seats + co.packs * 5} callers`;
+  $("#c-total").textContent = rupees(total) + per;
+  $("#c-note").textContent = `${rupees(total)} is charged today and your plan starts now, then every ${year ? "year" : "month"} by UPI Autopay or card. Cancel any time. Secure payment by Cashfree.`;
+  const submit = $("#signup-submit");
+  submit.innerHTML = `<svg aria-hidden="true"><use href="/assets/img/icons.svg#card"/></svg>Verify and pay ${rupees(total)}`;
+  submit.dataset.label = submit.innerHTML;
+}
+
+function initCheckout() {
+  if (!wantedPlan) return;
+  $("#checkout").hidden = false;
+  $("#plan-choice").hidden = true;
+  $$("[data-cplan]").forEach((b) => b.addEventListener("click", () => { co.plan = b.dataset.cplan; drawCheckout(); }));
+  $$("[data-cint]").forEach((b) => b.addEventListener("click", () => { co.interval = b.dataset.cint; drawCheckout(); }));
+  $("#c-minus").addEventListener("click", () => { co.packs = Math.max(0, co.packs - 1); drawCheckout(); });
+  $("#c-plus").addEventListener("click", () => { co.packs = Math.min(20, co.packs + 1); drawCheckout(); });
+  drawCheckout();
+}
+
+// ── Google suggestions: company name and business address ───────────────
+// A browser key restricted to this website, with Maps JavaScript API and Places API (New) on.
+// Empty = the two fields stay plain text boxes.
+const MAPS_KEY = "";
+let placesLib = null;
+
+function loadPlaces() {
+  if (!MAPS_KEY) return Promise.resolve(null);
+  placesLib ??= new Promise((resolve) => {
+    window.__placesReady = () => window.google.maps.importLibrary("places").then(resolve, () => resolve(null));
+    const s = document.createElement("script");
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_KEY}&loading=async&callback=__placesReady&region=IN&language=en`;
+    s.async = true;
+    s.onerror = () => resolve(null);
+    document.head.append(s);
+  });
+  return placesLib;
+}
+
+/** "Indore, Madhya Pradesh" from a picked place. */
+function cityOf(place) {
+  const part = (type) => place.addressComponents?.find((c) => c.types.includes(type))?.longText;
+  return [part("locality") || part("administrative_area_level_3") || part("administrative_area_level_2"), part("administrative_area_level_1")]
+    .filter(Boolean).join(", ");
+}
+
+/** Our own dropdown under an input, fed by Google Places (India only). */
+function suggest(input, { types, onPick }) {
+  const list = $(".suggest-list", input.parentElement);
+  let token = null;
+  let timer = 0;
+  let items = [];
+  let active = -1;
+  const close = () => { list.hidden = true; input.setAttribute("aria-expanded", "false"); active = -1; };
+  const mark = () => $$("li", list).forEach((li, i) => li.classList.toggle("is-active", i === active));
+  async function pick(i) {
+    const prediction = items[i];
+    close();
+    if (!prediction) return;
+    const place = prediction.toPlace();
+    await place.fetchFields({ fields: ["displayName", "formattedAddress", "addressComponents"] }).catch(() => {});
+    token = null; // a pick ends Google's billing session
+    onPick(place, prediction);
+  }
+  input.addEventListener("input", () => {
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      const q = input.value.trim();
+      const places = q.length >= 3 ? await loadPlaces() : null;
+      if (!places) return close();
+      token ??= new places.AutocompleteSessionToken();
+      try {
+        const { suggestions } = await places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
+          input: q, sessionToken: token, includedRegionCodes: ["in"], ...(types ? { includedPrimaryTypes: types } : {}),
+        });
+        items = suggestions.map((x) => x.placePrediction).filter(Boolean).slice(0, 5);
+      } catch {
+        items = [];
+      }
+      if (!items.length || input.value.trim() !== q) return close();
+      list.replaceChildren(...items.map((p, i) => {
+        const li = document.createElement("li");
+        li.role = "option";
+        const main = document.createElement("b");
+        main.textContent = p.mainText?.text ?? p.text.text;
+        const sub = document.createElement("span");
+        sub.textContent = p.secondaryText?.text ?? "";
+        li.append(main, sub);
+        li.addEventListener("mousedown", (e) => { e.preventDefault(); void pick(i); });
+        return li;
+      }));
+      list.hidden = false;
+      input.setAttribute("aria-expanded", "true");
+    }, 250);
+  });
+  input.addEventListener("keydown", (e) => {
+    if (list.hidden) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      active = (active + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+      mark();
+    } else if (e.key === "Enter" && active >= 0) {
+      e.preventDefault();
+      void pick(active);
+    } else if (e.key === "Escape") close();
+  });
+  input.addEventListener("blur", () => setTimeout(close, 120));
+}
+
+function initPlaces() {
+  if (!MAPS_KEY) return;
+  const form = $("#signup-form");
+  $("[data-places-hint]").hidden = false;
+  const setAddress = (place) => {
+    if (place.formattedAddress) form.address.value = place.formattedAddress;
+    form.city.value = cityOf(place);
+  };
+  suggest(form.companyName, {
+    types: ["establishment"],
+    onPick: (place) => {
+      if (place.displayName) form.companyName.value = place.displayName;
+      setAddress(place);
+    },
+  });
+  suggest(form.address, { onPick: setAddress });
+  form.address.addEventListener("input", () => (form.city.value = "")); // typed by hand: city = what they typed
 }
 
 // ── Forgot password ─────────────────────────────────────────────────────
@@ -572,11 +743,21 @@ function initSignupCopy() {
   if (!wantedPlan) return;
   const p = PRICES[wantedPlan];
   $("#signup-title").textContent = `Get ${p.name}`;
-  $("#signup-lead").textContent = `Create your company, then pay ${rupees(p.base)}/month and start today. No trial needed.`;
-  $("#plan-choice").innerHTML = `<b>${p.name} plan</b> · ${rupees(p.base)}/month · ${p.seats} callers. You pay on the next step.`;
-  const submit = $("#signup-submit");
-  submit.innerHTML = `<svg aria-hidden="true"><use href="/assets/img/icons.svg#card"/></svg>Verify and continue to pay`;
-  submit.dataset.label = submit.innerHTML;
+  $("#signup-lead").textContent = `Pay ${rupees(p.base)}/month and start today. No trial needed.`;
+}
+
+/** Back from Cashfree after a Starter/Pro sign-up: the company exists once the payment webhook lands. */
+function confirmCheckout(credential, tries = 0) {
+  if (tries === 0) show("confirming");
+  loadAccount({ credential }, {
+    justSignedUp: true,
+    noCompany: () => {
+      if (tries < 20) return void setTimeout(() => confirmCheckout(credential, tries + 1), 3000);
+      $("#confirm-title").textContent = "We haven't received your payment";
+      $("#confirm-lead").textContent = "If you cancelled it, sign up again. If money was taken, your company shows up here within a few minutes: reload this page, or message us on WhatsApp.";
+      $("#confirm-retry").hidden = false;
+    },
+  });
 }
 
 const fontIn = Promise.all(["400 1em 'Plus Jakarta Sans'", "800 1em 'Plus Jakarta Sans'"].map((f) => document.fonts.load(f)));
@@ -587,6 +768,8 @@ initSignup();
 initReset();
 initDashboard();
 initSignupCopy();
+initCheckout();
+initPlaces();
 renderGoogleButtons();
 startTicker();
 $$("[data-go]").forEach((b) => b.addEventListener("click", () => {
@@ -600,6 +783,7 @@ const mode = params.get("mode");
 const savedWeb = remembered("web");
 const savedGoogle = remembered("google");
 if (mode === "reset") show("reset");
+else if (params.has("checkout") && savedGoogle) { google = savedGoogle; confirmCheckout(savedGoogle); }
 else if (savedWeb) loadAccount({ token: savedWeb });
 else if (savedGoogle) { google = savedGoogle; loadAccount({ credential: savedGoogle }, { noCompany: () => onGoogleSignup(savedGoogle) }); }
 else show(mode === "signup" || wantedPlan ? "signup" : "login");

@@ -91,9 +91,11 @@
           <p class="who">Signed in as <b data-who></b> · <button type="button" class="link-btn" data-go="signup">Use another account</button></p>
           <form id="signup-form" novalidate>
             <div class="fields">
-              <div class="field wide">
+              <div class="field wide suggest">
                 <label for="companyName">Company name</label>
-                <input id="companyName" name="companyName" required maxlength="100" autocomplete="organization">
+                <input id="companyName" name="companyName" required maxlength="100" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="company-list">
+                <ul class="suggest-list" id="company-list" role="listbox" hidden></ul>
+                <span class="hint" data-places-hint hidden>Pick your business if Google knows it: we'll fill in the address.</span>
               </div>
               <div class="field">
                 <label for="name">Your name</label>
@@ -101,12 +103,17 @@
               </div>
               <div class="field">
                 <label for="phone">Mobile number</label>
-                <input id="phone" name="phone" type="tel" inputmode="numeric" required pattern="[+0-9 \-]{10,16}" placeholder="98765 43210" autocomplete="tel-national">
+                <div class="phone-in">
+                  <span class="cc" title="India">🇮🇳 +91</span>
+                  <input id="phone" name="phone" type="tel" inputmode="numeric" required pattern="[+0-9 \-]{10,16}" placeholder="98765 43210" autocomplete="tel-national">
+                </div>
                 <span class="field-err" id="phone-error" role="alert"></span>
               </div>
-              <div class="field">
-                <label for="city">City and state</label>
-                <input id="city" name="city" required maxlength="100" placeholder="Indore, Madhya Pradesh" autocomplete="address-level2">
+              <div class="field wide suggest">
+                <label for="address">Business address</label>
+                <input id="address" name="address" required maxlength="255" placeholder="Office address, area, city" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="address-list">
+                <input type="hidden" name="city">
+                <ul class="suggest-list" id="address-list" role="listbox" hidden></ul>
               </div>
               <div class="field">
                 <label for="teamSize">Callers in your team</label>
@@ -118,7 +125,7 @@
                   <option value="26+">26 or more</option>
                 </select>
               </div>
-              <div class="field wide">
+              <div class="field">
                 <label for="gstNumber">GST number <span>(optional)</span></label>
                 <input id="gstNumber" name="gstNumber" maxlength="15" autocapitalize="characters" placeholder="22AAAAA0000A1Z5">
               </div>
@@ -136,9 +143,40 @@
                 <span class="hint">At least 8 characters.</span>
               </div>
             </div>
+            <!-- Starter/Pro: what they're paying for, paid right after this form -->
+            <div class="checkout" id="checkout" hidden>
+              <div class="checkout-head">
+                <div class="seg" role="group" aria-label="Plan">
+                  <button type="button" data-cplan="STARTER">Starter</button>
+                  <button type="button" data-cplan="PRO">Pro</button>
+                </div>
+                <div class="seg" role="group" aria-label="Billing period">
+                  <button type="button" data-cint="MONTH">Monthly</button>
+                  <button type="button" data-cint="YEAR">Yearly <span class="save">2 months free</span></button>
+                </div>
+              </div>
+              <div class="packs">
+                <span><b>Extra callers</b><small id="c-pack-price"></small></span>
+                <div class="stepper">
+                  <button type="button" id="c-minus" aria-label="Fewer extra callers">−</button>
+                  <output id="c-extra" aria-live="polite">+0</output>
+                  <button type="button" id="c-plus" aria-label="More extra callers">+</button>
+                </div>
+              </div>
+              <div class="total"><span>Total <small id="c-callers"></small></span><b id="c-total"></b></div>
+              <p class="fine" id="c-note"></p>
+            </div>
             <label class="agree"><input type="checkbox" name="agree" required> <span>I agree to the <a href="/terms/" target="_blank">Terms of Service</a> and <a href="/privacy/" target="_blank">Privacy Policy</a>.</span></label>
             <button class="btn btn-primary" type="submit" id="signup-submit">Start my free trial</button>
           </form>
+          <p class="err" data-error role="alert"></p>
+        </div>
+
+        <!-- Back from Cashfree (Starter/Pro sign-up) -->
+        <div class="step" data-step="confirming" hidden>
+          <h1 id="confirm-title">Confirming your payment…</h1>
+          <p class="lead" id="confirm-lead">This takes a few seconds. Please keep this page open.</p>
+          <p class="switch" id="confirm-retry" hidden><button type="button" class="link-btn" data-go="signup">Sign up again</button></p>
           <p class="err" data-error role="alert"></p>
         </div>
 
