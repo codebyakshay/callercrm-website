@@ -61,12 +61,6 @@ function forgetAll() {
 }
 
 // ── Steps ───────────────────────────────────────────────────────────────
-const ART = {
-  login: ["For calling teams", "Every lead called.<br>Every outcome logged.", "One tap to call. Two to log it. Your manager sees it live."],
-  signup: ["Get started", "Your team calling<br>in ten minutes.", "Import from Google Sheets, assign in bulk, and watch every call come in."],
-  details: ["Almost there", "Tell us about<br>your company.", "You'll be the admin. Add your callers from the app."],
-  reset: ["Account", "Back in<br>a minute.", "Confirm it's you with Google, then choose a new app password."],
-};
 let step = "login";
 let google = null; // Google ID token from this visit's sign-in
 
@@ -75,13 +69,8 @@ function show(next, message = "") {
   $("#gate").hidden = false;
   $("#dash").hidden = true;
   $$(".step").forEach((el) => (el.hidden = el.dataset.step !== next));
-  const [kicker, title, foot] = ART[next] || ART.login;
-  $("#art-kicker").textContent = kicker;
-  $("#art-title").innerHTML = title;
-  $("#art-foot").textContent = foot;
   const current = $(`[data-step="${next}"]`);
   $$("[data-error]", current).forEach((e) => (e.textContent = message));
-  renderGoogleButton(current);
   window.scrollTo({ top: 0 });
 }
 
@@ -109,16 +98,17 @@ function startGoogle() {
   });
 }
 
-function renderGoogleButton(container) {
-  const slot = $("[data-google]", container);
-  if (!slot) return;
+// Every step's Google button is drawn once, up front, so switching steps never
+// rebuilds it (a fresh button flashes "Sign in with Google" before your name loads).
+function renderGoogleButtons() {
   onGoogleReady(() => {
     startGoogle();
-    slot.replaceChildren();
-    window.google.accounts.id.renderButton(slot, {
-      theme: "outline", size: "large", shape: "pill", logo_alignment: "center", width: Math.min(340, slot.clientWidth || 340),
-      text: step === "signup" ? "signup_with" : "continue_with",
-    });
+    $$("[data-google]").forEach((slot) =>
+      window.google.accounts.id.renderButton(slot, {
+        theme: "outline", size: "large", shape: "pill", logo_alignment: "center", width: Math.min(340, window.innerWidth - 72),
+        text: slot.closest("[data-step]").dataset.step === "signup" ? "signup_with" : "continue_with",
+      }),
+    );
   });
 }
 
@@ -508,6 +498,7 @@ initSignup();
 initReset();
 initDashboard();
 initSignupCopy();
+renderGoogleButtons();
 $$("[data-go]").forEach((b) => b.addEventListener("click", () => {
   if (b.dataset.go === "reset") { $("#reset-form").hidden = true; $("[data-google]", $('[data-step="reset"]')).hidden = false; }
   show(b.dataset.go);
