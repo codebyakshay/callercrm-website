@@ -63,7 +63,7 @@ function forgetAll() {
 
 // ── Steps ───────────────────────────────────────────────────────────────
 let step = "login";
-let google = null; // Google ID token from this visit's sign-in
+let googleToken = null; // Google ID token from this visit's sign-in (not "google": that global is Google's own)
 
 const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -78,7 +78,7 @@ function show(next, message = "") {
   };
   // Moving between steps crossfades (see ::view-transition in account.css); the first screen just appears.
   const switching = !$("#gate").hidden && $$(".step").some((el) => !el.hidden);
-  if (switching && document.startViewTransition && !calm) document.startViewTransition(swap);
+  if (switching && document.startViewTransition && !calm) document.startViewTransition(swap).ready.catch(() => {}); // skipped when the tab is hidden
   else swap();
 }
 
@@ -132,7 +132,7 @@ function revealWhenPersonal(slot) {
 }
 
 async function onGoogle(token) {
-  google = token;
+  googleToken = token;
   remember("google", token);
   stepError("");
   if (step === "reset") return googleForReset(token);
@@ -178,8 +178,8 @@ function initSignup() {
   const phone = form.phone;
   phone.addEventListener("input", () => { phone.setCustomValidity(""); $("#phone-error").textContent = ""; });
   phone.addEventListener("change", async () => {
-    if (!google || phone.value.replace(/\D/g, "").length < 10) return;
-    const { ok, data } = await post(`${API}/check`, { credential: google, phone: phone.value });
+    if (!googleToken || phone.value.replace(/\D/g, "").length < 10) return;
+    const { ok, data } = await post(`${API}/check`, { credential: googleToken, phone: phone.value });
     if (ok && data.phoneTaken) {
       const msg = "This number already has a CallerCRM company (one per number). Use another number, or log in.";
       phone.setCustomValidity(msg);
@@ -194,7 +194,7 @@ function initSignup() {
     const btn = $("#signup-submit");
     const f = new FormData(form);
     const body = {
-      credential: google,
+      credential: googleToken,
       companyName: f.get("companyName"), name: f.get("name"), phone: f.get("phone"),
       address: f.get("address"), city: f.get("city") || String(f.get("address")).slice(0, 100),
       teamSize: f.get("teamSize"), gstNumber: f.get("gstNumber"), username: f.get("username"), password: f.get("password"),
@@ -207,7 +207,7 @@ function initSignup() {
       busy(btn, false);
       if (!ok) return status === 401 ? show("signup", data.error) : stepError(data.error || "Something went wrong. Please try again.");
       form.reset();
-      return loadAccount({ credential: google }, { justSignedUp: true });
+      return loadAccount({ credential: googleToken }, { justSignedUp: true });
     }
     busy(btn, true, "Opening secure payment…");
     const { ok, status, data } = await post(`${API}/checkout`, { ...body, plan: co.plan, interval: co.interval, extraPacks: co.packs });
@@ -276,7 +276,7 @@ function initCheckout() {
 // ── Google suggestions: company name and business address ───────────────
 // A browser key restricted to this website, with Maps JavaScript API and Places API (New) on.
 // Empty = the two fields stay plain text boxes.
-const MAPS_KEY = "";
+const MAPS_KEY = "AIzaSyAGga12b-R_-GWkd8e6A-h_WJ-28DUh-tk";
 let placesLib = null;
 
 function loadPlaces() {
@@ -399,7 +399,7 @@ function initReset() {
     if (!form.reportValidity()) return;
     const btn = $("button[type=submit]", form);
     busy(btn, true, "Saving…");
-    const { ok, status, data } = await post(`${API}/reset-password`, { credential: google, password: form.password.value });
+    const { ok, status, data } = await post(`${API}/reset-password`, { credential: googleToken, password: form.password.value });
     busy(btn, false);
     if (!ok) return status === 401 ? show("reset", data.error) : stepError(data.error || "Something went wrong.");
     form.reset();
@@ -783,7 +783,7 @@ const mode = params.get("mode");
 const savedWeb = remembered("web");
 const savedGoogle = remembered("google");
 if (mode === "reset") show("reset");
-else if (params.has("checkout") && savedGoogle) { google = savedGoogle; confirmCheckout(savedGoogle); }
+else if (params.has("checkout") && savedGoogle) { googleToken = savedGoogle; confirmCheckout(savedGoogle); }
 else if (savedWeb) loadAccount({ token: savedWeb });
-else if (savedGoogle) { google = savedGoogle; loadAccount({ credential: savedGoogle }, { noCompany: () => onGoogleSignup(savedGoogle) }); }
+else if (savedGoogle) { googleToken = savedGoogle; loadAccount({ credential: savedGoogle }, { noCompany: () => onGoogleSignup(savedGoogle) }); }
 else show(mode === "signup" || wantedPlan ? "signup" : "login");
