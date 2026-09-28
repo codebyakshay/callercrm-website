@@ -478,7 +478,7 @@ function renderDashboard(justSignedUp) {
   const p = d.profile || {};
   const row = (id, value) => { $(`#${id}`).textContent = value ?? ""; $(`#${id}-row`).hidden = !value; };
   row("p-phone", p.phone ? `+91 ${p.phone}` : null);
-  row("p-city", p.city);
+  row("p-city", p.address || p.city);
   row("p-team", p.teamSize ? `${p.teamSize} callers` : null);
   row("p-gst", p.gstNumber);
 
