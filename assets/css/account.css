@@ -187,6 +187,9 @@ form .btn, .pay-actions .btn { width: 100%; }
 /* ── Dashboard ────────────────────────────────────────── */
 .dash { width: min(100% - 2 * var(--gutter), 1080px); margin: 0.5rem auto 4rem; animation: fade 0.35s var(--ease) both; }
 .dash-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.dash-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.btn-danger { color: #b3263d; border-color: #f3c9d0; }
+.btn-danger:hover { background: #fdecef; border-color: var(--red); }
 .dash-head h1 { font-size: clamp(1.9rem, 1.4rem + 1.8vw, 2.8rem); letter-spacing: -0.035em; margin: 0.5rem 0 0.3rem; }
 .dash-sub { color: var(--muted); font-size: var(--fs-sm); }
 .dash-sub b { color: var(--ink-soft); }

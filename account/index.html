@@ -17,9 +17,9 @@
   <link rel="stylesheet" href="/assets/css/tokens.css">
   <link rel="stylesheet" href="/assets/css/base.css">
   <link rel="stylesheet" href="/assets/css/components.css">
-  <link rel="stylesheet" href="/assets/css/account.css?v=20260929c">
+  <link rel="stylesheet" href="/assets/css/account.css?v=20260929d">
 
-  <script src="/assets/js/account.js?v=20260929c" defer></script>
+  <script src="/assets/js/account.js?v=20260929d" defer></script>
   <script src="https://accounts.google.com/gsi/client" async></script>
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js" defer></script>
 </head>
@@ -211,9 +211,12 @@
         <div>
           <span class="plan-pill" id="d-plan"></span>
           <h1 id="d-company"></h1>
-          <p class="dash-sub">Signed in as <b id="d-who"></b> · <button type="button" class="link-btn" id="logout">Log out</button></p>
+          <p class="dash-sub">Signed in as <b id="d-who"></b></p>
         </div>
-        <a class="btn btn-ghost btn-sm" href="https://play.google.com/store/apps/details?id=com.codebyakshay.callercrm" target="_blank" rel="noopener">Get the app</a>
+        <div class="dash-actions">
+          <a class="btn btn-ghost btn-sm" href="https://play.google.com/store/apps/details?id=com.codebyakshay.callercrm" target="_blank" rel="noopener">Get the app</a>
+          <button type="button" class="btn btn-ghost btn-sm btn-danger" id="logout">Log out</button>
+        </div>
       </div>
 
       <p class="banner" id="d-banner" role="status" hidden></p>
