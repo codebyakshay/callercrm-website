@@ -279,7 +279,9 @@ form .btn, .pay-actions .btn { width: 100%; }
 .tabs button { border: 0; background: none; padding: 0.55rem 1.2rem; border-radius: 999px; font-weight: 700; font-size: var(--fs-sm); color: var(--ink-soft); white-space: nowrap; }
 .tabs button[aria-selected="true"] { background: var(--grad-brand); color: #fff; }
 .tabs button:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
-.tab-panel { animation: fade 0.25s var(--ease) both; }
+.tab-panel { animation: tab-in 0.3s var(--ease) both; }
+/* The new tab comes in from the side you moved towards (--dx is set by showTab); the first one just fades. */
+@keyframes tab-in { from { opacity: 0; transform: translateX(var(--dx, 0)); } }
 
 /* ── Overview ─────────────────────────────────────────── */
 .ov-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }

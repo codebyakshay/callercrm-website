@@ -520,9 +520,16 @@ function renderDashboard(justSignedUp) {
 }
 
 // ── Tabs ────────────────────────────────────────────────────────────────
+const TABS = ["overview", "billing", "account"];
+let tabNow = null;
 function showTab(name) {
+  const dx = tabNow ? Math.sign(TABS.indexOf(name) - TABS.indexOf(tabNow)) * 16 : 0;
+  tabNow = name;
   $$("[data-tab]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
-  $$("[data-panel]").forEach((p) => (p.hidden = p.dataset.panel !== name));
+  $$("[data-panel]").forEach((p) => {
+    p.style.setProperty("--dx", `${dx}px`);
+    p.hidden = p.dataset.panel !== name;
+  });
   if (name === "overview") loadOverview();
 }
 
