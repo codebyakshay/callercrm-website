@@ -42,24 +42,25 @@ function busy(btn, on, label) {
   else btn.innerHTML = btn.dataset.label;
 }
 
-// ── Remembered login (this tab only) ────────────────────────────────────
-// Google's token lasts ~1 hour, our password-login token 12 hours; both are JWTs with an expiry.
+// ── Remembered login (every tab, survives closing the browser) ──────────
+// Our website token lasts 30 days and is renewed on every visit; Google's lasts ~1 hour and is only
+// kept to finish a sign-up. Both are JWTs with an expiry. Log out clears it everywhere.
 const KEYS = { google: "callercrm.google", web: "callercrm.web" };
 function remember(kind, token) {
-  try { sessionStorage.setItem(KEYS[kind], token); } catch { /* private mode: this page only */ }
+  try { localStorage.setItem(KEYS[kind], token); } catch { /* private mode: this page only */ }
 }
 function remembered(kind) {
   try {
-    const token = sessionStorage.getItem(KEYS[kind]);
+    const token = localStorage.getItem(KEYS[kind]);
     if (!token) return null;
     const { exp } = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
     if (exp * 1000 > Date.now() + 60000) return token;
-    sessionStorage.removeItem(KEYS[kind]);
+    localStorage.removeItem(KEYS[kind]);
   } catch { /* unreadable: log in again */ }
   return null;
 }
 function forgetAll() {
-  try { Object.values(KEYS).forEach((k) => sessionStorage.removeItem(k)); } catch { /* nothing stored */ }
+  try { Object.values(KEYS).forEach((k) => localStorage.removeItem(k)); } catch { /* nothing stored */ }
 }
 
 // ── Steps ───────────────────────────────────────────────────────────────
@@ -433,7 +434,12 @@ async function loadAccount(authBody, { justSignedUp = false, noCompany } = {}) {
     forgetAll();
     return show("login", status === 401 && authBody.token ? "Your login has expired. Please log in again." : data.error || "");
   }
-  auth = authBody;
+  // From now on use the server's long-lived login, whether they came in with Google or a password.
+  auth = data.token ? { token: data.token } : authBody;
+  if (data.token) {
+    remember("web", data.token);
+    try { localStorage.removeItem(KEYS.google); } catch { /* nothing stored */ }
+  }
   account = data;
   renderDashboard(justSignedUp);
 }
@@ -909,7 +915,7 @@ $$("[data-go]").forEach((b) => b.addEventListener("click", () => {
   show(b.dataset.go);
 }));
 
-// Already logged in on this tab? Straight to the dashboard. Otherwise the step from the link:
+// Already logged in in this browser? Straight to the dashboard. Otherwise the step from the link:
 // pricing "Choose Starter/Pro" → sign up for that plan; "Start free trial" → sign up; else log in.
 const mode = params.get("mode");
 const savedWeb = remembered("web");
