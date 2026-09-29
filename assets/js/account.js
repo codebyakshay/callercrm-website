@@ -670,8 +670,13 @@ function drawMode() {
   $("#billing").classList.toggle("is-renew", renew && !bill.editing);
   $("#b-current").hidden = !renew;
   $("#b-edit").textContent = bill.editing ? "Keep my current plan" : "Change plan or callers";
+  // In a trial nothing is due: buying is optional, and the trial's days are kept.
+  $("#b-trial").hidden = d.plan !== "TRIAL" || !d.paidUntil;
+  if (d.plan === "TRIAL" && d.paidUntil) {
+    $("#b-trial").textContent = `Your free trial runs until ${niceDay(d.paidUntil)}. Nothing to pay now. Buy a plan whenever you're ready: the days left in your trial are kept.`;
+  }
   $("#b-title").textContent =
-    d.plan === "TRIAL" ? "Choose your plan" : d.awaitingPayment ? "Pay for your plan" : bill.editing ? "Change plan or callers" : "Renew your plan";
+    d.plan === "TRIAL" ? "After your trial" : d.awaitingPayment ? "Pay for your plan" : bill.editing ? "Change plan or callers" : "Renew your plan";
   $(`input[name="b-plan"][value="${bill.plan}"]`).checked = true;
   drawPicker();
 }
@@ -709,7 +714,7 @@ function drawPicker() {
   $("#b-wa").hidden = d.paymentsOpen;
   const changed = Boolean(bill.current) && (bill.plan !== bill.current.plan || bill.packs !== bill.current.packs);
   nowBtn.textContent = trial
-    ? `Start ${p.name} · pay ${rupees(total)}`
+    ? `Buy ${p.name} now · ${rupees(total)}`
     : d.awaitingPayment ? `Pay ${rupees(total)} and start ${p.name}` : changed ? `Pay ${rupees(total)}` : `Renew · pay ${rupees(total)}`;
   nowBtn.dataset.label = nowBtn.textContent;
 

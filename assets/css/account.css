@@ -228,6 +228,7 @@ form .btn, .pay-actions .btn { width: 100%; }
 .seg button.is-on .save { background: rgb(255 255 255 / 0.2); color: #fff; }
 .plan-opts { display: grid; gap: 0.6rem; }
 /* Renewing: their own plan, not the plan table (that's behind "Change plan or callers"). */
+.trial-note { margin: -0.4rem 0 1.1rem; padding: 0.75rem 0.9rem; border-radius: 12px; background: #e8f8f0; color: #17664a; font-size: var(--fs-sm); }
 .card-billing.is-renew .plan-opts, .card-billing.is-renew .packs { display: none; }
 .cur-plan { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: 0.9rem 1rem; border-radius: var(--radius); background: var(--bg-soft); border: 1.5px solid var(--line); margin-bottom: 0.6rem; }
 .cur-plan span { display: grid; }
