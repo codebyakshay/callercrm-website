@@ -61,4 +61,4 @@ Then open http://localhost:8080.
 
 - Edit `privacy/index.html` and change the **Effective** date in the header pill.
 - Keep it true to what the app does. If the app starts collecting something new (a new permission, SDK or data field), update the "Data we collect", "Phone permissions" and "Sharing" sections, **and** the Play Console Data safety form.
-- Retention promises (20 days for lead, call and WhatsApp data; 24–48 hours for agents who leave) also appear in `index.html` (Security + FAQ) and `delete-account/index.html`. Keep all three pages in sync.
+- Retention promises (40 days for lead, call and WhatsApp data; 24–48 hours for agents who leave) also appear in `index.html` (Security + FAQ) and `delete-account/index.html`. Keep all three pages in sync.
