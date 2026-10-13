@@ -423,19 +423,12 @@
 .cta-box > * { position: relative; }
 .cta-box h2 { font-size: var(--fs-xl); max-width: 640px; margin: 0 auto 1rem; }
 .cta-box p { color: rgb(255 255 255 / 0.85); max-width: 520px; margin: 0 auto 2rem; }
-.play-badge {
-  display: inline-flex; align-items: center; gap: 0.7rem;
-  padding: 0.6rem 1.2rem; border-radius: 14px;
-  background: #0b0614; color: #fff; text-decoration: none; margin-left: 0.6rem;
-  border: 1px solid rgb(255 255 255 / 0.2);
-}
-.play-badge svg { width: 24px; height: 24px; }
-.play-badge small { display: block; font-size: 10px; opacity: 0.75; letter-spacing: 0.04em; text-transform: uppercase; }
-.play-badge b { font-size: var(--fs-sm); }
-.cta-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.8rem; }
+.play-badge { display: inline-flex; margin-left: 0.6rem; border-radius: 10px; }
+/* Google's official badge (assets/img/google-play-badge.png): shown as-is, only scaled. */
+.play-badge img { display: block; height: 56px; width: auto; }
 .hero-actions .play-badge, .cta-actions .play-badge { margin: 0; }
-a.play-badge { transition: transform 0.2s var(--ease), border-color 0.2s var(--ease); }
-a.play-badge:hover { transform: translateY(-2px); border-color: rgb(255 255 255 / 0.45); }
+a.play-badge { transition: transform 0.2s var(--ease); }
+a.play-badge:hover { transform: translateY(-2px); }
 
 /* ── Responsive ─────────────────────────────────────── */
 @media (max-width: 1000px) {
