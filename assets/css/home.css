@@ -433,7 +433,9 @@
 .play-badge small { display: block; font-size: 10px; opacity: 0.75; letter-spacing: 0.04em; text-transform: uppercase; }
 .play-badge b { font-size: var(--fs-sm); }
 .cta-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.8rem; }
-.cta-actions .play-badge { margin: 0; }
+.hero-actions .play-badge, .cta-actions .play-badge { margin: 0; }
+a.play-badge { transition: transform 0.2s var(--ease), border-color 0.2s var(--ease); }
+a.play-badge:hover { transform: translateY(-2px); border-color: rgb(255 255 255 / 0.45); }
 
 /* ── Responsive ─────────────────────────────────────── */
 @media (max-width: 1000px) {
