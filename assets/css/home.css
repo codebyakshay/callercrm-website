@@ -426,6 +426,7 @@
 .play-badge { display: inline-flex; margin-left: 0.6rem; border-radius: 10px; }
 /* Google's official badge (assets/img/google-play-badge.png): shown as-is, only scaled. */
 .play-badge img { display: block; height: 56px; width: auto; }
+.cta-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.8rem; }
 .hero-actions .play-badge, .cta-actions .play-badge { margin: 0; }
 a.play-badge { transition: transform 0.2s var(--ease); }
 a.play-badge:hover { transform: translateY(-2px); }
