@@ -54,7 +54,7 @@
         <h1 data-rise style="--delay:.06s">Privacy Policy</h1>
         <p data-rise style="--delay:.12s">This policy explains what personal data CallerCRM collects, why we collect it, who we share it with, how long we keep it, and the choices and rights you have.</p>
         <div class="legal-meta" data-rise style="--delay:.18s">
-          <span class="pill">Effective 3 October 2026</span>
+          <span class="pill">Effective 2 November 2026</span>
           <span class="pill">Applies to the CallerCRM Android app and its servers</span>
         </div>
       </div>
@@ -127,7 +127,8 @@
 
           <h3>3. Call activity</h3>
           <p>For each call an Agent places to a Lead through CallerCRM: the outcome the Agent selects (for example "Interested" or "Callback"), any note the Agent types, the call status, the call's duration and the date and time. Admins use this data for team reports, including daily attendance (calls made, total and average talk time, and newly interested leads).</p>
-          <p><strong>How call duration is read:</strong> once a call placed from CallerCRM ends, the app looks through the most recent entries (up to 10) in your phone's call log for the outgoing call to that Lead's number, and reads only that call's duration. No other call-log entries are stored, uploaded or shared.</p>
+          <p><strong>How the call log is used:</strong> once a call placed from CallerCRM ends, the app finds that call in your phone's call log by the Lead's number and reads its duration. The app also looks in the call log for calls between you and the Leads assigned to you that happened outside CallerCRM (a Lead calling you back, a missed or declined call from a Lead, or a call you made from your phone's dialer) and uploads each one's type, date and time, and duration, so it shows on that Lead's history and counts in your Organisation's reports. Calls with any other number are never stored, uploaded or shared.</p>
+          <p><strong>"On a call" notification:</strong> while a call you started from CallerCRM is on, the app shows an "On a call" notification until you save the call's outcome. It lets the app open the outcome screen when the call ends. It does not record the call.</p>
 
           <h3>4. WhatsApp messages</h3>
           <p>If your Organisation uses the WhatsApp feature, we store the messages exchanged with Leads through the WhatsApp Business Platform (message text, sender, time, delivery and read status, and any delivery error). This includes the Lead's WhatsApp name and phone number.</p>
@@ -164,7 +165,8 @@
               <tbody>
                 <tr><td>Make and manage phone calls<br><code>CALL_PHONE</code></td><td>To call a Lead directly from the app when you tap the call button.</td><td>You can't place calls from CallerCRM.</td></tr>
                 <tr><td>Read phone status<br><code>READ_PHONE_STATE</code></td><td>To detect when the call you started connects and ends, so the app can ask for the outcome at the right moment.</td><td>The app can't tell when a call ends.</td></tr>
-                <tr><td>Read call log<br><code>READ_CALL_LOG</code></td><td>To read the duration of the call you just placed to a Lead (see "How call duration is read" above).</td><td>Call duration is not recorded.</td></tr>
+                <tr><td>Read call log<br><code>READ_CALL_LOG</code></td><td>To read the duration of the call you just placed to a Lead, and to show your other calls with your assigned Leads on their history (see "How the call log is used" above).</td><td>Call duration and Lead call-backs are not recorded.</td></tr>
+                <tr><td>Run a foreground service<br><code>FOREGROUND_SERVICE</code></td><td>To show the "On a call" notification while a call you started from CallerCRM is on.</td><td>—</td></tr>
                 <tr><td>Notifications<br><code>POST_NOTIFICATIONS</code></td><td>To alert you when new leads are assigned, a lead replies, or a callback you scheduled is due.</td><td>You won't get lead alerts.</td></tr>
                 <tr><td>Internet, vibration</td><td>To sync with our servers and to vibrate for notifications.</td><td>—</td></tr>
               </tbody>
