@@ -299,15 +299,20 @@
               <span><small>Your plan</small><b id="b-cur-name"></b></span>
               <button type="button" class="link-btn" id="b-edit">Change plan or callers</button>
             </div>
-              <div class="seg" role="group" aria-label="Billing period">
+              <!-- On a running paid plan: renew it, or add callers now for the days left -->
+              <div class="seg seg-mode" id="b-mode" role="group" aria-label="What to pay for" hidden>
+                <button type="button" class="is-on" data-mode="renew" aria-pressed="true">Renew</button>
+                <button type="button" data-mode="add" aria-pressed="false">Add callers now</button>
+              </div>
+              <div class="seg renew-only" role="group" aria-label="Billing period">
                 <button type="button" class="is-on" data-interval="MONTH" aria-pressed="true">Monthly</button>
                 <button type="button" data-interval="YEAR" aria-pressed="false">Yearly <span class="save">2 months free</span></button>
               </div>
-              <div class="plan-opts" role="radiogroup" aria-label="Plan">
+              <div class="plan-opts renew-only" role="radiogroup" aria-label="Plan">
                 <label class="plan-opt"><input type="radio" name="b-plan" value="STARTER"><span><b>Starter</b><small>10 callers · calling and Google Sheets</small></span><em data-price="STARTER"></em></label>
                 <label class="plan-opt"><input type="radio" name="b-plan" value="PRO" checked><span><b>Pro</b><small>12 callers · WhatsApp integration included</small></span><em data-price="PRO"></em></label>
               </div>
-              <div class="packs">
+              <div class="packs renew-only">
                 <span><b>Extra callers</b><small id="b-pack-price"></small></span>
                 <div class="stepper">
                   <button type="button" id="b-minus" aria-label="Fewer extra callers">−</button>
@@ -315,8 +320,20 @@
                   <button type="button" id="b-plus" aria-label="More extra callers">+</button>
                 </div>
               </div>
-              <div class="total"><span>Total <small id="b-callers"></small></span><b id="b-total"></b></div>
-              <p class="discount" id="b-discount" hidden></p>
+              <div class="total renew-only"><span>Total <small id="b-callers"></small></span><b id="b-total"></b></div>
+              <p class="discount renew-only" id="b-discount" hidden></p>
+              <div class="add-only">
+                <p class="fine" id="a-intro"></p>
+                <div class="packs">
+                  <span><b>Callers to add</b><small id="a-pack-price"></small></span>
+                  <div class="stepper">
+                    <button type="button" id="a-minus" aria-label="Fewer callers to add">−</button>
+                    <output id="a-count" aria-live="polite">+5</output>
+                    <button type="button" id="a-plus" aria-label="More callers to add">+</button>
+                  </div>
+                </div>
+                <div class="total"><span>Pay now <small id="a-callers"></small></span><b id="a-total"></b></div>
+              </div>
               <div class="fields contact" id="b-contact" hidden>
                 <div class="field" id="b-email-field">
                   <label for="b-email">Email for payment receipts</label>
@@ -327,33 +344,19 @@
                   <input id="b-phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="98765 43210">
                 </div>
               </div>
-              <div class="pay-actions">
+              <div class="pay-actions add-only">
+                <button class="btn btn-primary" type="button" id="a-now"></button>
+              </div>
+              <p class="fine add-only" id="a-note"></p>
+              <p class="err add-only" id="a-error" role="alert"></p>
+              <div class="pay-actions renew-only">
                 <button class="btn btn-primary" type="button" id="b-now"></button>
                 <a class="btn btn-primary" id="b-wa" href="https://wa.me/917898131225" target="_blank" rel="noopener" hidden>Pay on WhatsApp</a>
               </div>
-              <p class="fine" id="b-note"></p>
+              <p class="fine renew-only" id="b-note"></p>
               <p class="fine">Questions about plans or callers? <a href="https://wa.me/917898131225?text=Hi%2C%20I%20have%20a%20question%20about%20my%20CallerCRM%20plan." target="_blank" rel="noopener">Talk to us</a> on WhatsApp.</p>
               <p class="err" id="b-error" role="alert"></p>
             </div>
-          </article>
-          <!-- Add callers in the middle of a paid month or year -->
-          <article class="card card-add" id="add-callers" hidden>
-            <h2>Add callers now</h2>
-            <p class="fine" id="a-intro"></p>
-            <div class="packs">
-              <span><b>Callers to add</b><small id="a-pack-price"></small></span>
-              <div class="stepper">
-                <button type="button" id="a-minus" aria-label="Fewer callers to add">−</button>
-                <output id="a-count" aria-live="polite">+5</output>
-                <button type="button" id="a-plus" aria-label="More callers to add">+</button>
-              </div>
-            </div>
-            <div class="total"><span>Pay now <small id="a-callers"></small></span><b id="a-total"></b></div>
-            <div class="pay-actions">
-              <button class="btn btn-primary" type="button" id="a-now"></button>
-            </div>
-            <p class="fine" id="a-note"></p>
-            <p class="err" id="a-error" role="alert"></p>
           </article>
           </div>
           <div class="col">

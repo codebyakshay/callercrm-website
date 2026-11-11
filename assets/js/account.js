@@ -422,7 +422,7 @@ async function checkOrder() {
   const { data } = await post(`${BILLING_API}/confirm`, { orderId: params.get("order") });
   orderPaid = data?.paid === true;
 }
-const bill = { plan: wantedPlan || "PRO", interval: "MONTH", packs: 0, discount: 0, current: null, editing: false };
+const bill = { plan: wantedPlan || "PRO", interval: "MONTH", packs: 0, discount: 0, current: null, editing: false, mode: "renew" };
 
 async function loadAccount(authBody, { justSignedUp = false, noCompany } = {}) {
   const { ok, status, data } = await post(`${API}/account`, authBody);
@@ -683,8 +683,19 @@ function drawMode() {
   if (d.plan === "TRIAL" && d.paidUntil) {
     $("#b-trial").textContent = `Your free trial runs until ${niceDay(d.paidUntil)}. Nothing to pay now. Buy a plan whenever you're ready: the days left in your trial are kept.`;
   }
+  // Renew, or (plan paid and running) add callers now for the days left: one card, a switch between them.
+  const canAdd = renew && !bill.editing && Boolean(d.addCallers) && d.paymentsOpen;
+  if (!canAdd) bill.mode = "renew";
+  $("#b-mode").hidden = !canAdd;
+  $("#billing").classList.toggle("is-add", bill.mode === "add");
+  $$("[data-mode]").forEach((b) => {
+    const on = b.dataset.mode === bill.mode;
+    b.classList.toggle("is-on", on);
+    b.setAttribute("aria-pressed", String(on));
+  });
   $("#b-title").textContent =
-    d.plan === "TRIAL" ? "After your trial" : d.awaitingPayment ? "Pay for your plan" : bill.editing ? "Change plan or callers" : "Renew your plan";
+    d.plan === "TRIAL" ? "After your trial" : d.awaitingPayment ? "Pay for your plan" : bill.editing ? "Change plan or callers"
+      : canAdd ? "Your plan" : "Renew your plan";
   $(`input[name="b-plan"][value="${bill.plan}"]`).checked = true;
   drawPicker();
 }
@@ -787,7 +798,6 @@ function addPrice(o, packs) {
 
 function renderAddCallers() {
   const o = account.addCallers;
-  $("#add-callers").hidden = !o || !account.paymentsOpen;
   if (!o) return;
   add.packs = Math.min(Math.max(add.packs, 1), o.maxAdd);
   const now = account.seatLimit || PRICES[o.plan].seats;
@@ -835,6 +845,7 @@ function initAddCallers() {
   $("#a-minus").addEventListener("click", () => { add.packs--; renderAddCallers(); });
   $("#a-plus").addEventListener("click", () => { add.packs++; renderAddCallers(); });
   $("#a-now").addEventListener("click", (e) => payAddCallers(e.currentTarget));
+  $$("[data-mode]").forEach((b) => b.addEventListener("click", () => { bill.mode = b.dataset.mode; drawMode(); }));
 }
 
 function renderPayments() {

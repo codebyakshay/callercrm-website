@@ -229,7 +229,7 @@ form .btn, .pay-actions .btn { width: 100%; }
 .plan-opts { display: grid; gap: 0.6rem; }
 /* Renewing: their own plan, not the plan table (that's behind "Change plan or callers"). */
 .trial-note { margin: -0.4rem 0 1.1rem; padding: 0.75rem 0.9rem; border-radius: 12px; background: #e8f8f0; color: #17664a; font-size: var(--fs-sm); }
-.card-billing.is-renew .plan-opts, .card-billing.is-renew .packs { display: none; }
+.card-billing.is-renew .plan-opts, .card-billing.is-renew .packs.renew-only { display: none; }
 .cur-plan { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: 0.9rem 1rem; border-radius: var(--radius); background: var(--bg-soft); border: 1.5px solid var(--line); margin-bottom: 0.6rem; }
 .cur-plan span { display: grid; }
 .cur-plan small { color: var(--muted); font-size: var(--fs-xs); font-weight: 700; }
@@ -254,8 +254,11 @@ form .btn, .pay-actions .btn { width: 100%; }
 .discount { margin-top: 0.5rem; font-size: var(--fs-xs); font-weight: 700; color: #13895b; }
 .contact { margin-top: 1rem; }
 .pay-actions { display: grid; gap: 0.6rem; margin-top: 1.2rem; }
-.card-add { margin-top: 1rem; }
-.card-add h2 { margin-bottom: 0.3rem; }
+/* Renew or Add callers now: one card, the switch shows one set of controls. */
+.seg-mode { width: 100%; margin-bottom: 0.8rem; }
+.seg-mode button { flex: 1; justify-content: center; font-size: var(--fs-sm); padding: 0.55rem 1rem; }
+.card-billing.is-add .renew-only, .card-billing:not(.is-add) .add-only { display: none; }
+.add-only .fine:first-child { margin: 0.2rem 0 0; }
 /* Billing tab: Payments is as tall as the renew card beside it; its list scrolls inside. */
 .dash-grid.even { align-items: stretch; }
 .dash-grid.even .col > .card { height: 100%; }
