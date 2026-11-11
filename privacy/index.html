@@ -54,7 +54,7 @@
         <h1 data-rise style="--delay:.06s">Privacy Policy</h1>
         <p data-rise style="--delay:.12s">This policy explains what personal data CallerCRM collects, why we collect it, who we share it with, how long we keep it, and the choices and rights you have.</p>
         <div class="legal-meta" data-rise style="--delay:.18s">
-          <span class="pill">Effective 2 November 2026</span>
+          <span class="pill">Effective 11 November 2026</span>
           <span class="pill">Applies to the CallerCRM Android app and its servers</span>
         </div>
       </div>
@@ -120,7 +120,7 @@
 
           <h3>1. Account information</h3>
           <p>For Admins and Agents: name, username, password, phone number (optional), role (Admin or Agent), the Organisation they belong to, and which Admin an Agent belongs to. Passwords are stored only as a one-way cryptographic hash (bcrypt). Nobody can read your password, including us.</p>
-          <p>For each Organisation: its name, plan, number of callers allowed and billing dates. If it uses WhatsApp on its own number: its WhatsApp phone number ID, access token (stored encrypted) and the names of its message templates.</p>
+          <p>For each Organisation: its name, plan, number of callers allowed and billing dates, and the payments it makes on our website: amount, date, what was bought (a month, a year, or callers added) and the payment ID from Cashfree. To take a payment we also need an Admin's email (for the receipt) and mobile number. If it uses WhatsApp on its own number: its WhatsApp phone number ID, access token (stored encrypted) and the names of its message templates.</p>
 
           <h3>2. Lead information (provided by your Organisation)</h3>
           <p>Lead name and phone number, the link to the Google Sheet they were imported from, which Agent they are assigned to, the assignment date and the lead's current status.</p>
@@ -152,7 +152,7 @@
             <li>We do not access your location, contacts or address book, photos, files, camera or SMS.</li>
             <li>We do not collect your advertising ID and do not track you across other apps or websites.</li>
             <li>We do not ask for access to your Google account. Lead import reads only the specific Google Sheet link your Admin provides. If your Organisation sets up a lead export sheet and shares it with our export account, we write leads to that sheet only.</li>
-            <li>We do not collect payment card or bank details in the app.</li>
+            <li>We never see or store card, UPI or bank details. Payments are made on Cashfree's own payment page, and nothing is paid inside the app.</li>
           </ul>
         </section>
 
@@ -199,6 +199,7 @@
                 <tr><td>Meta Platforms (WhatsApp Business Platform)</td><td>Sending and receiving WhatsApp messages with Leads</td><td>Lead phone numbers and names, message content</td></tr>
                 <tr><td>Expo (650 Industries, Inc.) and Google Firebase Cloud Messaging</td><td>Delivering push notifications; anonymous app usage statistics</td><td>Push token, notification content, app and OS version</td></tr>
                 <tr><td>Google (Google Sheets API)</td><td>Reading the lead sheet an Admin links to; writing leads that were never reached, or asked to be called back, to the Organisation's own export sheet</td><td>The sheet link and the contents of that sheet; for the export: lead name, phone number, status, Agent name and dates</td></tr>
+                <tr><td>Cashfree Payments India Pvt. Ltd.</td><td>Taking payments made on our website's account page</td><td>The Organisation's name, the paying Admin's name, email and mobile number, the amount and what is being bought. Card, UPI or bank details are entered on Cashfree's page and are not shared with us</td></tr>
                 <tr><td>Google Play</td><td>Distributing and updating the app</td><td>As described in Google's own privacy policy</td></tr>
                 <tr><td>Cloudflare, Inc. (R2 storage)</td><td>Storing nightly backup copies of our database for up to 7 days</td><td>All data in our database, encrypted on our server before it is sent, so Cloudflare cannot read it</td></tr>
               </tbody>

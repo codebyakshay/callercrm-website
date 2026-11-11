@@ -489,6 +489,7 @@ function renderDashboard(justSignedUp) {
   row("p-gst", p.gstNumber);
 
   renderBilling();
+  renderAddCallers();
   renderPayments();
 
   const banner = $("#d-banner");
@@ -775,6 +776,67 @@ function initBilling() {
   });
 }
 
+// ── Add callers now (mid-period) ───────────────────────────────────────
+const add = { packs: 1 };
+
+/** Same sum as the server: a pack's price per day (month ÷ 30, year ÷ 365) × days left, at least ₹1. */
+function addPrice(o, packs) {
+  const perPeriod = PRICES[o.plan].pack * packs * (o.interval === "YEAR" ? 10 : 1);
+  return Math.max(1, Math.round((perPeriod * (100 - bill.discount) * o.daysLeft) / (100 * (o.interval === "YEAR" ? 365 : 30))));
+}
+
+function renderAddCallers() {
+  const o = account.addCallers;
+  $("#add-callers").hidden = !o || !account.paymentsOpen;
+  if (!o) return;
+  add.packs = Math.min(Math.max(add.packs, 1), o.maxAdd);
+  const now = account.seatLimit || PRICES[o.plan].seats;
+  const days = `${o.daysLeft} ${o.daysLeft === 1 ? "day" : "days"}`;
+  $("#a-intro").textContent =
+    `Need more callers before your plan renews? Add packs of 5 now and pay only for the ${days} left, until ${niceDay(o.lastDay)}.`;
+  $("#a-pack-price").textContent = `${rupees(addPrice(o, 1))} per pack of 5 for ${days}`;
+  $("#a-count").textContent = `+${add.packs * 5}`;
+  $("#a-minus").disabled = add.packs === 1;
+  $("#a-plus").disabled = add.packs === o.maxAdd;
+  $("#a-callers").textContent = `${now} → ${now + add.packs * 5} callers`;
+  const total = addPrice(o, add.packs);
+  $("#a-total").textContent = rupees(total);
+  $("#a-now").textContent = `Add ${add.packs * 5} callers · pay ${rupees(total)}`;
+  $("#a-now").dataset.label = $("#a-now").textContent;
+  $("#a-note").textContent =
+    `The extra callers work as soon as it's paid. Your plan still runs until ${niceDay(o.lastDay)}, and from your next renewal they're part of your normal price. One-time payment by Cashfree: UPI, card or netbanking.`;
+}
+
+async function payAddCallers(btn) {
+  $("#a-error").textContent = "";
+  busy(btn, true, "Opening secure payment…");
+  const { ok, status, data } = await post(`${BILLING_API}/add-callers`, {
+    ...auth, packs: add.packs, email: $("#b-email").value, phone: $("#b-phone").value,
+  });
+  if (!ok) {
+    busy(btn, false);
+    if (status === 401) { forgetAll(); return show("login", data.error); }
+    $("#a-error").textContent = data.error || "Couldn't start the payment. Please try again.";
+    return;
+  }
+  if (!window.Cashfree) {
+    busy(btn, false);
+    $("#a-error").textContent = "The payment page didn't load. Check your internet, reload, and try again.";
+    return;
+  }
+  const result = await window.Cashfree({ mode: data.mode }).checkout({ paymentSessionId: data.sessionId, redirectTarget: "_self" });
+  if (result?.error) {
+    busy(btn, false);
+    $("#a-error").textContent = result.error.message || "The payment page didn't open. Please try again.";
+  }
+}
+
+function initAddCallers() {
+  $("#a-minus").addEventListener("click", () => { add.packs--; renderAddCallers(); });
+  $("#a-plus").addEventListener("click", () => { add.packs++; renderAddCallers(); });
+  $("#a-now").addEventListener("click", (e) => payAddCallers(e.currentTarget));
+}
+
 function renderPayments() {
   const d = account;
   const list = d.payments || [];
@@ -786,9 +848,11 @@ function renderPayments() {
     `<div><small>Paid so far</small><b>${rupees(list.reduce((n, p) => n + p.amount, 0))}</b></div>`;
   $("#pay-list").innerHTML = list
     .map((p) => {
-      const what = p.plan && PRICES[p.plan]
-        ? `${PRICES[p.plan].name} · 1 ${p.interval === "YEAR" ? "year" : "month"}${p.extraPacks ? ` · +${p.extraPacks * 5} callers` : ""}`
-        : "Payment";
+      const what = p.addOn
+        ? `Added ${p.extraPacks * 5} callers`
+        : p.plan && PRICES[p.plan]
+          ? `${PRICES[p.plan].name} · 1 ${p.interval === "YEAR" ? "year" : "month"}${p.extraPacks ? ` · +${p.extraPacks * 5} callers` : ""}`
+          : "Payment";
       return `<li><span class="ic"><svg aria-hidden="true"><use href="/assets/img/icons.svg#check"/></svg></span>` +
         `<b>${what}</b><span class="amt">${rupees(p.amount)}</span>` +
         `<small>${niceDay(p.paidOn)} · <span class="nw">ID ${esc(p.id)}</span></small><small class="to">Covers to ${niceDay(p.coversUntil)}</small></li>`;
@@ -798,6 +862,7 @@ function renderPayments() {
 
 function initDashboard() {
   initBilling();
+  initAddCallers();
   initOverview();
   $("#logout").addEventListener("click", () => {
     auth = null;

@@ -254,6 +254,8 @@ form .btn, .pay-actions .btn { width: 100%; }
 .discount { margin-top: 0.5rem; font-size: var(--fs-xs); font-weight: 700; color: #13895b; }
 .contact { margin-top: 1rem; }
 .pay-actions { display: grid; gap: 0.6rem; margin-top: 1.2rem; }
+.card-add { margin-top: 1rem; }
+.card-add h2 { margin-bottom: 0.3rem; }
 /* Billing tab: Payments is as tall as the renew card beside it; its list scrolls inside. */
 .dash-grid.even { align-items: stretch; }
 .dash-grid.even .col > .card { height: 100%; }

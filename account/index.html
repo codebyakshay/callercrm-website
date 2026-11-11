@@ -336,6 +336,25 @@
               <p class="err" id="b-error" role="alert"></p>
             </div>
           </article>
+          <!-- Add callers in the middle of a paid month or year -->
+          <article class="card card-add" id="add-callers" hidden>
+            <h2>Add callers now</h2>
+            <p class="fine" id="a-intro"></p>
+            <div class="packs">
+              <span><b>Callers to add</b><small id="a-pack-price"></small></span>
+              <div class="stepper">
+                <button type="button" id="a-minus" aria-label="Fewer callers to add">−</button>
+                <output id="a-count" aria-live="polite">+5</output>
+                <button type="button" id="a-plus" aria-label="More callers to add">+</button>
+              </div>
+            </div>
+            <div class="total"><span>Pay now <small id="a-callers"></small></span><b id="a-total"></b></div>
+            <div class="pay-actions">
+              <button class="btn btn-primary" type="button" id="a-now"></button>
+            </div>
+            <p class="fine" id="a-note"></p>
+            <p class="err" id="a-error" role="alert"></p>
+          </article>
           </div>
           <div class="col">
           <!-- Payments -->
